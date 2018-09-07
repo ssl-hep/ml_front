@@ -713,7 +713,7 @@ app.get('/user', function (req, res) {
     });
 });
 
-app.get('/authorize/:user_id', function (req, res) {
+app.get('/authorize/:user_id', async function (req, res) {
     var user_id = request.params.user_id;
     try {
         const response = await es_client.update({

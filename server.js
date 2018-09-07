@@ -715,7 +715,6 @@ app.get('/users_data', function (req, res) {
     es_client.search({
         index: 'mlfront_users', type: 'docs',
         body: {
-            _source: ["user", "email", "affiliation", "created_at", "approved", "approved_on"],
             query: {
                 match: {
                     "event": ml_front_config.NAMESPACE

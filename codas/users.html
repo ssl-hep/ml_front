@@ -116,8 +116,7 @@
             $(document).ready(function () {
                 $.getJSON('/users_data', function (data) {
                     console.log(data);
-                    var monit = 'https://grafana.nautilus.optiputer.net/d/7xXMBtHiz/k8s-compute-resources-pod?refresh=10s&orgId=1&var-datasource=prometheus&var-namespace=ml&var-pod='
-                    var table = $('#services_table').DataTable({
+                    var table = $('#users_table').DataTable({
                         data: data,
                         "paging": false,
                         "searching": false,
@@ -127,12 +126,7 @@
                             { "mData": 2, "sTitle": "Affiliation", "sWidth": "20%" },
                             { "mData": 3, "sTitle": "Registered on", "sWidth": "20%" },
                             { "mData": 4, "sTitle": "Authorized", "sWidth": "5%" },
-                            { "mData": 5, "sTitle": "Authorized on", "sWidth": "20%" },
-                            {
-                                "mData": null,
-                                "bSortable": false,
-                                "mRender": function (o) { return '<a href=/delete/' + o[1] + '>Delete</a>&nbsp;&nbsp;<a href=' + monit + o[1] + '>Monitor</a>' }
-                            }
+                            { "mData": 5, "sTitle": "Authorized on", "sWidth": "20%" }
                         ]
                     });
                 });

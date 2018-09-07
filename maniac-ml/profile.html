@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="ML platform store front" />
+		<meta name="keywords" content="kubernetes, k8s, Jupyter, JupyterLab, Machine Learning, platform" />
+		<meta name="author" content="Ilija Vukotic" />
+		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <!-- <link rel="shortcut icon" type="image/x-icon" href="{{url_for('static', filename='img/favicon.ico')}}" /> -->
+    <!-- <link rel="icon" type="image/x-icon" href="{{url_for('static', filename='img/favicon.ico')}}" /> -->
+    <!-- {# Favicons for SLATE #} -->
+    <!-- <link rel="apple-touch-icon" sizes="180x180" href="{{url_for('static', filename='img/favicons/apple-touch-icon.png')}}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{url_for('static', filename='img/favicons/favicon-32x32.png')}}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{url_for('static', filename='img/favicons/favicon-16x16.png')}}">
+    <link rel="manifest" href="{{url_for('static', filename='img/favicons/site.webmanifest')}}">
+    <link rel="mask-icon" href="{{url_for('static', filename='img/favicons/safari-pinned-tab.svg')}}" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff"> -->
+
+    <title>CODAS Machine Learning platform</title>
+
+    <!-- {# CSS files #} -->
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" />
+    <link href="css/style.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
+    <!-- {# Custom Fonts #} -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- {# JavaScript files #} -->
+    <!-- Bootstrap core JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.compatibility.min.js"></script>
+
+
+  </head>
+
+<body>
+
+    <div class="gtco-loader"></div>
+
+    <div id="page">
+
+        <div id="ilija_navigation"></div>
+
+        <section id="gtco-header" class="gtco-cover gtco-cover-xs gtco-inner" style="background-color: rgba(52, 58, 64, 0.4)">
+    		  <div class="gtco-container container">
+    		    <div class="row">
+    		      <div class="col-lg-5 mx-auto">
+    		        <!-- <h2>About Us</h2> -->
+    		        <p class="lead">
+    							<img src="images/cube.png">
+    		        </p>
+    		        <!-- <button type="button" class="btn btn-primary">Read More</button> -->
+    		      </div>
+    		      <div class="col-lg-4 mx-auto">
+    						<div class="card" style="width: 18rem;">
+    							<!-- <img class="card-img-top" src="images/staff_1.jpg" alt="Card image"> -->
+    						  <div class="card-body">
+    						    <h4 class="card-title">Profile Information</h4>
+    						    <div>
+                      Name: <p class="card-text" id='yourname'></p>
+                    </div>
+                    <div>Email:
+                        <p class="card-text" id='youremail'></p>
+                    </div>
+                    <div>Organization:
+                        <p class="card-text" id='yourorganization'></p>
+                    </div>
+                    <hr/>
+                    <button class="btn btn-primary" id='logout_button'>Logout</button>
+
+    						  </div>
+    						  <!-- <ul class="list-group list-group-flush">
+    						    <li class="list-group-item">Cras justo odio</li>
+    						    <li class="list-group-item">Dapibus ac facilisis in</li>
+    						    <li class="list-group-item">Vestibulum at eros</li>
+    						  </ul> -->
+    						</div>
+    		      </div>
+    		    </div>
+    		  </div>
+    		</section>
+
+        <!-- <section id="gtco-header" class="gtco-cover" role="banner">
+            <div class="gtco-container">
+                <div class="row">
+                    <div class="col-md-12 col-md-offset-0 text-left">
+                        <div class="display-t">
+                            <div class="display-tc">
+                                <div class="row">
+                                    <div class="col-md-5 text-center header-img">
+                                        <img src="images/cube.png">
+                                    </div>
+                                    <div class="col-md-7 copy">
+                                        <h1>Your profile</h1>
+                                        <div>Name:
+                                            <p id='yourname'></p>
+                                        </div>
+                                        <div>Email:
+                                            <p id='youremail'></p>
+                                        </div>
+                                        <div>Organization:
+                                            <p id='yourorganization'></p>
+                                        </div>
+                                        <button id='logout_button'>Logout</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section> -->
+        <!-- END #gtco-header -->
+
+        <hr/>
+        <div id="ilija_footer"></div>
+
+    </div>
+
+    <div class="gototop js-top">
+        <a href="#" class="js-gotop">
+            <i class="icon-arrow-up"></i>
+        </a>
+    </div>
+
+    <!-- jQuery -->
+    <script src="js/jquery.min.js"></script>
+    <!-- jQuery Easing -->
+    <script src="js/jquery.easing.1.3.js"></script>
+    <!-- Bootstrap -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Waypoints -->
+    <script src="js/jquery.waypoints.min.js"></script>
+    <!-- Carousel -->
+    <script src="js/owl.carousel.min.js"></script>
+    <!-- Magnific Popup -->
+    <script src="js/jquery.magnific-popup.min.js"></script>
+    <script src="js/magnific-popup-options.js"></script>
+    <!-- Main -->
+    <script src="js/main.js"></script>
+    <script src="js/handling.js"></script>
+    <script type="text/javascript" language="JavaScript">
+        $.get("/user", function (data) {
+            $('#yourname').text(data.name);
+            $('#youremail').text(data.email);
+            $('#yourorganization').text(data.organization);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,85 @@
+ANTONIOS AGAPITOS,Rutgers University,ph2632@gmail.com
+Leigh Schaefer,University of Pennsylvania,lscha@sas.upenn.edu
+Rachael Creager,University of Pennsylvania,rcreager@cern.ch
+Nicolò Foppiani,Harvard University,nicolo.foppiani@gmail.com
+Wouter Van De Pontseele,Harvard/Oxford University,woutervdp@g.harvard.edu
+Guy Rosin,University of Massachusetts Amherst,guy.rosin@cern.ch
+Harish Potti,University of Texas at Austin,harish.potti@utexas.edu
+Aaron Webb,University of Texas at Austin,aaron.f.webb@gmail.com
+Amandeep Singh Bakshi,Purdue University,bakshi3@purdue.edu
+Reddy Pratap Gandrajula,Michigan State University,gandraju@msu.edu
+Micah Groh,Indiana University,mcgroh@iu.edu
+Sean-Jiun Wang,University of Florida,sean-jiun.wang@cern.ch
+Tielige Mengke,Texas Tech University,tielige.mengke@ttu.edu
+Yi Zhang,University of California,Riverside,yzhan096@ucr.edu
+Weinan Si,University of California,Riverside,weinan.si@cern.ch
+Hong Ni,Vanderbilt University,hong.ni@vanderbilt.edu
+Rohith Saradhy,University of Minnesota,sarad005@umn.edu
+Qisen Lin,University of Chicago,qslin@uchicago.edu
+Tongguang Cheng,Purdue University Northwest,tongguang.cheng@cern.ch
+Bobak Hashemi,UCSD,bhashemi@physics.ucsd.edu
+Benjamin Tannenwald,University of Virginia,benjamin.tannenwald@cern.ch
+Cristiana Principato,University of Virginia,crisprin@fnal.gov
+Fan Xia,University of Virginia,fx9vr@virginia.edu
+Dipsikha Debnath,University of Florida,dipsikha.debnath@gmail.com
+Terrence Edmonds,Purdue University,tedmonds@purdue.edu
+Amanda Harrison,Purdue University,harri724@purdue.edu
+Andrew Wildridge,Purdue University,awildrid@purdue.edu
+Erich Schmitz,University of Kansas,erichjs@ku.edu
+Ramya Bhaskar,University of Washington,rbhaskar@uw.edu
+Suyog Shrestha,Ohio State University,suyog.shrestha@cern.ch
+Mariel Pettee,Yale University,mariel.pettee@yale.edu
+Namita Shokeen,Wayne State Univerisity,fq5009@wayne.edu
+Aaron Mislivec,University of Minnesota,aaron.mislivec@gmail.com
+Sourav Sen,Duke University,sourav.sen@duke.edu
+Mazin Khader,UIUC,mwkhader@gmail.com
+Nabarun Dev,University of Notre Dame,ndev@nd.edu
+Saptaparna Bhattacharya,Northwestern University,saptaparna@gmail.com
+Vakhtang Tsiskaridze,Stony Brook University,vakhtang.tsiskaridze@cern.ch
+Daniel Gawerc,Caltech,danielgawerc@gmail.com
+Maria Acosta,Fermi National Accelerator Laboratory,macosta@fnal.gov
+Miaoyuan Liu,Fermilab,liumy871227@gmail.com
+Blake Forland,Indiana University,lyon.bcf@gmail.com
+Souvik Das,Purdue University,das69@purdue.edu
+Irakli Chakaberia,Kent State University,iraklic@cern.ch
+Benedikt Riedel,University of Chicago,briedel@uchicago.edu
+Jeriek Paul Van den Abeele,University of Oslo,jeriekvda@fys.uio.no
+Nilesh Patil,University of Rochester Medical Center,nilesh.patil@rochester.edu
+Eli Bæverfjord Rye,University of Oslo,e.b.rye@fys.uio.no
+Simen Hellesund,University of Oslo,simen.hellesund@gmail.com
+Allie Reinsvold Hall,Fermilab,ahall@fnal.gov
+Savvas Kyriacou,Rutgers the State University of New Jersey,savvasphy@gmail.com
+Noah Paladino,Rutgers University,New Brunswick,noah.paladino@rutgers.edu
+Hardik Routray,Rutgers University-New Brunswick,hardik.routray@rutgers.edu
+Kelvin Mei,Princeton University,kmei@princeton.edu
+Jean Somalwar,Princeton University,somalwar@princeton.edu
+David Smith,U. Wisconsin-Madison,drsmith@pppl.gov
+Abhijith Gandrakota,Rutgers University,agandrak@cern.ch
+Peter Elmer,Princeton University,gelmer@princeton.edu
+Matthieu Lefebvre,Princeton University,ml15@Princeton.EDU
+David Luet,Princeton University,luet@princeton.edu
+David Lange,Princeton University,david.lange@princeton.edu
+Jim Pivarski,Princeton University,pivarski@princeton.edu
+Ian Cosden,Princeton University,icosden@princeton.edu
+Tim Mattson,Intel,timothy.g.mattson@intel.com
+Heather Gray,Lawrence Berkeley National Laboratory,heather.gray@cern.ch
+Alexey Svyatkovskiy,Microsoft/Princeton University,alexeys@princeton.edu
+Dan Riley,Cornell University,daniel.riley@cornell.edu
+Steve Lantz,Cornell University Center for Advanced Computing,steve.lantz@cornell.edu
+Slava Krutelyov,UCSD,slava77@fnal.gov
+Alfredo Canziani,NYU Center for Data Science,canziani@nyu.edu
+Ilija Vukotic,University of Chicago,ivukotic@uchicago.edu
+
+
+while read p; do
+  echo $p
+  IFS=',' read -r -a array <<< "$p"
+  echo "${array[0]}"
+  curl -X POST "atlas-kibana.mwt2.org:9200/mlfront_users/docs/" -H 'Content-Type: application/json' -d"
+{
+    \"event\": \"codas\",
+    \"user\": \"${array[0]}\",
+    \"affiliation\": \"${array[1]}\",
+    \"email\": \"${array[2]}\"
+}"
+done < users.txt

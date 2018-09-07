@@ -1,0 +1,24 @@
+{
+    "kind": "Service",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "xxx",
+        "namespace": "ml",
+        "labels": {
+            "k8s-app": "ml-personal",
+            "instance": "xxx"
+        }
+    },
+    "spec": {
+        "type": "LoadBalancer",
+        "ports": [
+            {
+                "port": 80,
+                "targetPort": 9999
+            }
+        ],
+        "selector": {
+            "instance": "xxx"
+        }
+    }
+}

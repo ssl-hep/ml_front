@@ -1,0 +1,66 @@
+{
+    "kind": "Pod",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "ml-personal",
+        "namespace": "xxx",
+        "labels": {
+            "k8s-app": "ml-personal",
+            "time2delete": "ttl-0",
+            "instance": "xxx",
+            "owner": "xxx",
+            "repo": "xxx"
+        }
+    },
+    "spec": {
+        "containers": [
+            {
+                "name": "ml-personal",
+                "image": "ivukotic/ml_platform_auto:latest",
+                "args": [
+                    "/.run",
+                    "/ML_platform_tests/SetupPrivateJupyterLab.sh",
+                    "pass",
+                    "repo"
+                ],
+                "ports": [
+                    {
+                        "containerPort": 9999
+                    }
+                ],
+                "resources": {
+                    "requests": {
+                        "cpu": 1,
+                        "memory": "12Gi",
+                        "nvidia.com/gpu": 1
+                    },
+                    "limits": {
+                        "cpu": 1,
+                        "memory": "12Gi",
+                        "nvidia.com/gpu": 1
+                    }
+                },
+                "volumeMounts": [
+                    {
+                        "name": "local-scratch",
+                        "mountPath": "/data",
+                        "readOnly": false
+                    }
+                ]
+            }
+        ],
+        "volumes": [
+            {
+                "name": "local-scratch",
+                "hostPath": {
+                    "path": "/data"
+                }
+            }
+        ],
+        "nodeSelector": {
+            "mlnode": "true"
+        },
+        "restartPolicy": "Always",
+        "serviceAccountName": "ml-fronter"
+    }
+}

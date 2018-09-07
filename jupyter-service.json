@@ -1,0 +1,25 @@
+{
+    "kind": "Service",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "ml-personal",
+        "namespace": "xxx",
+        "labels": {
+            "k8s-app": "ml-personal",
+            "instance": "xxx",
+            "servingat": "ml.usatlas.org"
+        }
+    },
+    "spec": {
+        "type": "NodePort",
+        "ports": [
+            {
+                "port": 80,
+                "targetPort": 9999
+            }
+        ],
+        "selector": {
+            "instance": "xxx"
+        }
+    }
+}

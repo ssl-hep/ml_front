@@ -1,0 +1,40 @@
+{
+  "name": "ml_front",
+  "version": "1.0.0",
+  "description": "a frontend for k8s ML resources.",
+  "main": "ml_front.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ivukotic/ML_front.git"
+  },
+  "keywords": [
+    "ml",
+    "k8s",
+    "frontend"
+  ],
+  "author": "Ilija Vukotic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ivukotic/ML_front/issues"
+  },
+  "homepage": "https://github.com/ivukotic/ML_front#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cookies": "^0.7.1",
+    "elasticsearch": "^15.1.1",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "fs": "0.0.1-security",
+    "https": "^1.0.0",
+    "kubernetes-client": "^5.3.0",
+    "mailgun-js": "^0.20.0",
+    "npm": "^6.1.0",
+    "pug": "^2.0.3",
+    "request": "^2.87.0",
+    "requests": "^0.2.2",
+    "requires": "^1.0.2"
+  }
+}

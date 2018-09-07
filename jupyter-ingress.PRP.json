@@ -1,0 +1,33 @@
+{
+    "kind": "Ingress",
+    "apiVersion": "extensions/v1beta1",
+    "metadata": {
+        "name": "xxx",
+        "namespace": "ml",
+        "annotations": {
+            "kubernetes.io/ingress.class": "traefik"
+        },
+        "labels": {
+            "k8s-app": "ml-personal",
+            "instance": "xxx"
+        }
+    },
+    "spec": {
+        "rules": [
+            {
+                "host": "xxx",
+                "http": {
+                    "paths": [
+                        {
+                            "path": "/",
+                            "backend": {
+                                "serviceName": "xxx",
+                                "servicePort": 80
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

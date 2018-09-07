@@ -709,6 +709,46 @@ app.get('/user', function (req, res) {
     });
 });
 
+app.get('/users_data', function (req, res) {
+    console.log('sending profile info back.');
+
+    es_client.search({
+        index: 'ml_front', type: 'docs',
+        body: {
+            _source: ["user", "email", "affiliation", "created_at", "approved", "approved_on"],
+            query: {
+                match: {
+                    "event": ml_front_config.NAMESPACE
+                }
+            },
+            sort: { "created_at": { order: "desc" } }
+        }
+    }).then(
+        function (resp) {
+            // console.log(resp);
+            if (resp.hits.total > 0) {
+                // console.log(resp.hits.hits);
+                toSend = [];
+                for (var i = 0; i < resp.hits.hits.length; i++) {
+                    var obj = resp.hits.hits[i]._source;
+                    console.log(obj);
+                    var created_at = new Date(obj.created_at).toUTCString();
+                    var approved_on = new Date(obj.approved_on).toUTCString();
+                    serv = [obj.user, obj.email, obj.affiliation, created_at, obj.approved, approved_on]
+                    toSend.push(serv);
+                }
+                res.status(200).send(toSend);
+            } else {
+                console.log("no users found.");
+                res.status(200).send([]);
+            }
+        },
+        function (err) {
+            console.trace(err.message);
+        });
+
+});
+
 app.get('/authorize/:user_id', async function (req, res) {
     var user_id = req.params.user_id;
     try {
@@ -727,7 +767,7 @@ app.get('/authorize/:user_id', async function (req, res) {
     } catch (err) {
         console.error(err)
     }
-    // res.redirect("/index.html");
+    res.redirect("/users.html");
 });
 
 app.use((err, req, res, next) => {

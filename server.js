@@ -127,12 +127,8 @@ function ask_for_approval(user_info) {
 
     if (ml_front_config.APPROVAL_REQUIRED == true) {
         if (ml_front_config.hasOwnProperty("APPROVAL_EMAIL")) {
-            if (ml_front_config.SSL == true)
-                link = 'https://'
-            else
-                link = 'http://'
-            link = link + ml_front_config.SITENAME + '/authorize/' + user_info.sub;
 
+            link = 'https://' + ml_front_config.SITENAME + '/authorize/' + user_info.sub;
             data = {
                 from: "ATLAS Alarm & Alert System <aaas@analytics.mwt2.org>",
                 to: ml_front_config.APPROVAL_EMAIL,
@@ -714,7 +710,7 @@ app.get('/user', function (req, res) {
 });
 
 app.get('/authorize/:user_id', async function (req, res) {
-    var user_id = request.params.user_id;
+    var user_id = req.params.user_id;
     try {
         const response = await es_client.update({
             index: 'mlfront_users',
@@ -731,7 +727,7 @@ app.get('/authorize/:user_id', async function (req, res) {
     } catch (err) {
         console.error(err)
     }
-    // response.redirect("/index.html");
+    // res.redirect("/index.html");
 });
 
 app.use((err, req, res, next) => {

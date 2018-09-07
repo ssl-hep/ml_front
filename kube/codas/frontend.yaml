@@ -31,7 +31,7 @@ metadata:
 spec:
   containers:
   - name: codas
-    image: sslhep/mlfront:latest
+    image: sslhep/ml_front:latest
     ports:
       - containerPort: 443
       - containerPort: 80

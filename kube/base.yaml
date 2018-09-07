@@ -31,7 +31,7 @@ metadata:
 spec:
   containers:
   - name: ml-front
-    image: sslhep/mlfront:latest
+    image: sslhep/ml_front:latest
     args: ["sleep", "36500000"]
     ports:
       - containerPort: 443

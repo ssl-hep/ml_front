@@ -713,7 +713,7 @@ app.get('/users_data', function (req, res) {
     console.log('sending profile info back.');
 
     es_client.search({
-        index: 'ml_front', type: 'docs',
+        index: 'mlfront_users', type: 'docs',
         body: {
             _source: ["user", "email", "affiliation", "created_at", "approved", "approved_on"],
             query: {

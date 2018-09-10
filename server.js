@@ -69,7 +69,7 @@ async function es_check_user_authorized(user_info) {
             body: {
                 query: {
                     bool: {
-                        "must": [
+                        must: [
                             {
                                 match: {
                                     "event": ml_front_config.NAMESPACE
@@ -484,23 +484,31 @@ const requiresLogin = (req, res, next) => {
 
     if (ml_front_config.APPROVAL_REQUIRED == true) {
 
-        console.log("Authorization required - searching for: ", req.session.email);
+        console.log("Authorization required - searching for: ", req.session.sub_id);
 
         es_client.search({
             index: "mlfront_users", type: "docs",
-            body: { size: 500, query: { match: { "event": ml_front_config.NAMESPACE } } }
+            body: {
+                size: 1,
+                query: {
+                    bool: {
+                        must: [
+                            { match: { event: ml_front_config.NAMESPACE } },
+                            { match: { _id: req.session.sub_id } },
+                            { match: { approved: true } }
+                        ]
+                    }
+                }
+            }
         }, function (error, response, status) {
             if (error) {
                 console.log("search error: " + error);
                 return "not authorized. Server error."
             }
             else {
-                for (const hit of response.hits.hits) {
-                    d = hit['_source']
-                    console.log(d);
-                    if (d.email.toLowerCase() == req.session.email.toLowerCase()) {
-                        return next();
-                    }
+                if (response.hits.total == 1) {
+                    console.log("authorized.");
+                    return next();
                 };
                 var err = new Error('You must be authorized for this service.');
                 err.status = 403;

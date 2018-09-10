@@ -24,6 +24,6 @@ http://atlas-kibana.mwt2.org/goto/7ad9cbf9627d180d24e06ac018ac6c4a
 * new authorization plugin
   * in profile approved or not does not refresh without full log out/log in.
   * endpoint that approves should return OK/NOT OK.
-* new instances
+* waiting for the pod to start ...
 * TFAAS
 * script to list users

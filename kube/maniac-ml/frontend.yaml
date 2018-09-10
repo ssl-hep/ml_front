@@ -1,12 +1,12 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: ml-front
-  namespace: ml-usatlas-org
+  name: maniac-front
+  namespace: maniac-ml
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: ml-front.slateci.net
+    external-dns.alpha.kubernetes.io/hostname: ml.maniac.uchicago.edu
   labels:
-    k8s-app: ml-front
+    k8s-app: maniac-front
 spec:
   type: LoadBalancer
   ports:
@@ -19,15 +19,15 @@ spec:
     port: 80
     targetPort: 80
   selector:
-    k8s-app: ml-front
+    k8s-app: maniac-front
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: ml-front  
-  namespace: ml-usatlas-org
+  name: maniac-front  
+  namespace: maniac-ml
   labels:
-    k8s-app: ml-front
+    k8s-app: maniac-front
 spec:
   containers:
   - name: ml-front
@@ -49,6 +49,8 @@ spec:
       readOnly: true
     - name: globus-conf-volume
       mountPath: "/etc/globus-conf/"
+    - name: mg-conf-volume
+      mountPath: "/etc/mg-conf/"
     - name: frontend-conf-volume
       mountPath: "/etc/ml-front-conf/"
   volumes:
@@ -69,10 +71,16 @@ spec:
         path: globus-config.json
   - name: frontend-conf-volume
     secret:
-      secretName: mlfront-config
+      secretName: config
       items:
       - key: mlconf
         path: mlfront-config.json
+  - name: mg-conf-volume
+    secret:
+      secretName: mg-config
+      items:
+      - key: mgconf
+        path: config.json
   serviceAccountName: ml-fronter
   # serviceAccount: default
   restartPolicy: Always

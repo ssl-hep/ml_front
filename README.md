@@ -6,6 +6,25 @@ Exposes k8s ml resources to users as services:
 
 A deployment creates node.js based web frontend. The front end authenticates users through globus. User can select to instantiate several different services, select hardware needed, duration, and other parameters. 
 
+## Configuration options
+
+|| Variable || Meaning || Example value ||
+| SITENAME | address where the front end will be accessible from  | ml.maniac.uchicago.edu|
+| NAMESPACE| k8s namespace where all of pods and services will run | maniac-ml |
+| SSL | Are JupyterLabs served on https? |false|
+| STATIC_BASE_PATH | points to directory with the static web pages | maniac-ml |
+| APPROVAL_REQUIRED | Is authorization required (on top of globus authentication)? | true |
+| APPROVAL_EMAIL | Only if authorization is required | ivukotic@cern.ch |
+| SINGLE_INSTANCE | Limit to only one private Jupyter instance| false |
+| PUBLIC_INSTANCE | Expose a public JupyterLab instance that anyone can use | true |
+| MONITOR | Enable user access to monitoring info | true |
+| TFAAS | Enable Tensorflow as a service | false |
+| REMOTE_K8S | Enable non local k8s service spawn | false |
+| REPORTING | Are pods monitored in Elasticsearc | true |
+| JL_POD | Used to customize JuputerLab pod. | /jupyter-pod.json |
+| JL_SERVICE | Used to customize JuputerLab service. |/jupyter-service.json |
+
+
 
 ## Authorizing users
 

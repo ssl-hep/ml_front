@@ -2,10 +2,11 @@
     id="mainNav">
     <div class="container">
         <a class="navbar-brand" href="https://github.com/ssl-hep">
-            <img src="images/SSL-logo-v5.png" width="30" height="30" class="d-inline-block align-top" alt=""> Scalable Systems
+            <img src="images/SSL-logo-v5.png" width="30" height="30" class="d-inline-block align-top" alt=""> Scalable
+            Systems
             Laboratory</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive"
-            aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+            aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -18,16 +19,16 @@
                     <a class="nav-link" href="about.html">About</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true"
-                        aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
                         Services
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item requires_login" style="display:none;" href="services.html">My Services</a>
-                        <a class="dropdown-item" href="https://grafana.nautilus.optiputer.net/d/4r_GftHmz/k8s-compute-resources-namespace?refresh=10s&orgId=1&var-datasource=prometheus&var-namespace=ml&from=now-6h&to=now
-                        " target="_blank">Monitor</a>
-                        <!-- <a class="dropdown-item" href="http://grafana.mwt2.org/dashboard/db/codas-utilization?orgId=1&from=now-6h&to=now" target="_blank">Monitor</a> -->
-                        <a class="dropdown-item requires_login" href="http://ml.usatlas.org:30080/lab?" style="display:none;">Public
+                        <a class="dropdown-item" id="plugin_MONITOR" href="https://grafana.nautilus.optiputer.net/d/4r_GftHmz/k8s-compute-resources-namespace?refresh=10s&orgId=1&var-datasource=prometheus&var-namespace=ml&from=now-6h&to=now"
+                            target="_blank">Monitor</a>
+                        <a class="dropdown-item requires_login" id="plugin_PUBLIC" href="http://ml.usatlas.org:30080/lab?"
+                            style="display:none;">Public
                             Lab</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item requires_login" style="display:none;" href="users.html">Users</a>
@@ -39,60 +40,7 @@
                 <li class="nav-item" id="profile_button" style="display:none;">
                     <a class="nav-link" href="profile.html">Profile</a>
                 </li>
-                <!-- <li class="nav-item requires_login">
-          <a class="nav-link" href="{{url_for('logout')}}">Logout</a>
-        </li> -->
-                <!-- <form class="form-inline">
-          <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
-        </form> -->
             </ul>
         </div>
     </div>
 </nav>
-
-<!-- <nav class="gtco-nav" role="navigation">
-    <div class="gtco-container">
-
-        <div class="row">
-            <div class="col-sm-2 col-xs-12">
-                <div id="gtco-logo">
-                    <a href="index.html">
-                        <img src="images/logo.png">
-                    </a>
-                </div>
-            </div>
-            <div class="col-xs-10 text-right menu-1">
-                <ul>
-                    <li class="active">
-                        <a href="index.html">Home</a>
-                    </li>
-                    <li class="has-dropdown">
-                        <a href="#">Services</a>
-                        <ul class="dropdown">
-                            <li class="requires_login" style="display:none;">
-                                <a href="http://ml.usatlas.org:30080/lab?">Public Lab</a>
-                            </li>
-                            <li class="requires_login" style="display:none;">
-                                <a href="services.html">My Services</a>
-                            </li>
-                            <li>
-                                <a href="https://grafana.mwt2.org/dashboard/db/ml-gpu-utilization?orgId=1&from=now-6h&to=now">Monitor</a>
-                            </li>
-                            <li>
-                                <a href="about.html">About</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li id="login_button">
-                        <a href="/login">Login</a>
-                    </li>
-                    <li id="profile_button" style="display:none;">
-                        <a href="profile.html">Profile</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-    </div>
-</nav> -->

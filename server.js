@@ -604,6 +604,15 @@ app.get('/healthz', function (req, res) {
     }
 });
 
+app.get('/plugins', function (req, res) {
+    // console.log('sending plugins info back.');
+    res.json({
+        TFAAS: ml_front_config.TFAAS,
+        PUBLIC_INSTANCE: ml_front_config.PUBLIC_INSTANCE,
+        MONITOR: ml_front_config.MONITOR
+    });
+});
+
 app.post('/jupyter', requiresLogin, parameterChecker, fullHandler, (req, res) => {
     console.log('Private Jupyter created!');
     res.status(200).send(res.link);

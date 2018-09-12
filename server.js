@@ -130,7 +130,7 @@ function ask_for_approval(user_info) {
 
             link = 'https://' + ml_front_config.SITENAME + '/authorize/' + user_info.sub;
             data = {
-                from: "ATLAS Alarm & Alert System <aaas@analytics.mwt2.org>",
+                from: ml_front_config.NAMESPACE + "<" + ml_front_config.NAMESPACE + "@maniac.uchicago.edu>",
                 to: ml_front_config.APPROVAL_EMAIL,
                 subject: "Authorization requested",
                 text: "Dear Sir/Madamme, \n\n\t" + user_info.name +
@@ -336,6 +336,15 @@ async function get_service_link(name) {
         console.log(`can't get service ${name}.`);
     }
 
+}
+
+function follow_events() {
+    const stream = client.apis.apps.v1beta.watch.namespaces(ml_front_config.NAMESPACE).deployments.getStream();
+    const jsonStream = new JSONStream();
+    stream.pipe(jsonStream);
+    jsonStream.on('data', object => {
+        console.log('Event: ', JSON.stringify(object, null, 2));
+    });
 }
 
 async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = "12", time, repo) {
@@ -808,6 +817,7 @@ async function main() {
         // await cleanup("ml-personal");
         // await create_jupyter("ml-personal", "ASDF", 1, 2);
         await show_pods();
+        follow_events();
     } catch (err) {
         console.error('Error: ', err);
     }

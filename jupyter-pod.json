@@ -61,6 +61,6 @@
             "mlnode": "true"
         },
         "restartPolicy": "Always",
-        "serviceAccountName": "ml-fronter"
+        "serviceAccountName": "xxx"
     }
 }

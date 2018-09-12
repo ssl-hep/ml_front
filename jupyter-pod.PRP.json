@@ -58,6 +58,6 @@
             }
         ],
         "restartPolicy": "Always",
-        "serviceAccountName": "ml-fronter"
+        "serviceAccountName": "xxx"
     }
 }

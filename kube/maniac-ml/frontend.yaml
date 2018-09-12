@@ -81,6 +81,5 @@ spec:
       items:
       - key: mgconf
         path: config.json
-  serviceAccountName: ml-fronter
-  # serviceAccount: default
+  serviceAccountName: maniac-ml-fronter
   restartPolicy: Always

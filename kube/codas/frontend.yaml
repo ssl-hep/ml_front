@@ -81,5 +81,5 @@ spec:
       items:
       - key: mgconf
         path: config.json
-  serviceAccountName: ml-fronter
+  serviceAccountName: codas-fronter
   restartPolicy: Always

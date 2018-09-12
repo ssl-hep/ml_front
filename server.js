@@ -357,6 +357,7 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = "12", ti
         jupyterPodManifest.spec.containers[0].resources.limits["cpu"] = cpu;
         jupyterPodManifest.spec.containers[0].args[2] = pass;
         jupyterPodManifest.spec.containers[0].args[3] = repo;
+        jupyterPodManifest.spec.serviceAccountName = ml_front_config.NAMESPACE + '-fronter';
 
         await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods.post({ body: jupyterPodManifest });
     } catch (err) {

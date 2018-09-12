@@ -339,7 +339,7 @@ async function get_service_link(name) {
 }
 
 function follow_events() {
-    const stream = client.apis.apps.v1beta.watch.namespaces(ml_front_config.NAMESPACE).pods.getStream();
+    const stream = client.apis.apps.v1.watch.namespaces(ml_front_config.NAMESPACE).pods.getStream();
     const jsonStream = new JSONStream();
     stream.pipe(jsonStream);
     jsonStream.on('data', object => {

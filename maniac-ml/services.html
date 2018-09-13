@@ -59,17 +59,16 @@
                         <div class="display-t">
                             <div class="display-tc">
                                 <div class="col-md-8">
-                                    <h1 class="no-margin">Your JupyterLab Notebooks</h1>
-                                    <p>Create new notebooks. Manage running notbooks.</p>
+                                    <h1 class="no-margin">Your deployments</h1>
+                                    <p>From this page you can manage your private services. Please delete a service
+                                        when you don't need it
+                                        anymore. To check if a service status changed simply refresh this page.</p>
                                     <a class='btn btn-primary' href="PrivateJupyter.html">
                                         New Personal JupyterLab
                                     </a>
                                     <a class='btn btn-primary' id="plugin_TFAAS" href="TFAAS.html">
                                         Tensorflow as a service
                                     </a>
-                                    <!-- <a class='btn btn-primary' href="/resources">
-                                        Get Available Resources
-                                    </a> -->
                                 </div>
                             </div>
                         </div>
@@ -79,22 +78,43 @@
         </section>
 
         <div class="gtco-services gtco-section">
-            <div class="col-md-12 col-md-offset-0 text-left">
-                <h2>Running Notebooks</h2>
-                <table id="services_table" class="display" style="width:80%">
-                    <thead>
-                        <tr>
-                            <th>Service</th>
-                            <th>Name</th>
-                            <th>Started at</th>
-                            <th>Ending at</th>
-                            <th>GPUs</th>
-                            <th>Link</th>
-                            <th>Command</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
+            <h2>Running Services</h2>
+            <table id="services_table" class="display" style="width:80%">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Name</th>
+                        <th>Started at</th>
+                        <th>Ending at</th>
+                        <th>GPUs</th>
+                        <th>CPUs</th>
+                        <th>Memory</th>
+                        <th>Link</th>
+                        <th>Status</th>
+                        <th>Command</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+
+
+            <h2>All Services</h2>
+            <table id="services_table_es" class="display" style="width:80%">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Name</th>
+                        <th>Started at</th>
+                        <th>Ending at</th>
+                        <th>GPUs</th>
+                        <th>CPUs</th>
+                        <th>Memory</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
         </div>
 
 
@@ -126,29 +146,52 @@
 
     <script type="text/javascript" language="JavaScript">
         $(document).ready(function () {
-            $.getJSON('/get_users_services', function (data) { // get_services
+
+            $.getJSON('/get_users_services', function (data) {
                 console.log(data);
-                var monit = 'https://grafana.nautilus.optiputer.net/d/7xXMBtHiz/k8s-compute-resources-pod?refresh=10s&orgId=1&var-datasource=prometheus&var-namespace=ml&var-pod='
                 var table = $('#services_table').DataTable({
                     data: data,
                     "paging": false,
                     "searching": false,
                     "aoColumns": [
-                        { "mData": 0, "sTitle": "Service", "sWidth": "10%" },
+                        { "mData": 0, "sTitle": "Service", "sWidth": "15%" },
                         { "mData": 1, "sTitle": "Name", "sWidth": "10%" },
-                        { "mData": 2, "sTitle": "Started at", "sWidth": "10%" },
-                        { "mData": 3, "sTitle": "Ending at", "sWidth": "10%" },
+                        { "mData": 2, "sTitle": "Started at", "sWidth": "15%" },
+                        { "mData": 3, "sTitle": "Ending at", "sWidth": "15%" },
                         { "mData": 4, "sTitle": "GPUs", "sWidth": "5%" },
-                        { "mData": 5, "sTitle": "Link", "sWidth": "20%" },
-                        { "mData": 6, "sTitle": "Status", "sWidth": "5%" },
+                        { "mData": 5, "sTitle": "Cores", "sWidth": "5%" },
+                        { "mData": 6, "sTitle": "Memory", "sWidth": "5%" },
+                        { "mData": 7, "sTitle": "Link", "sWidth": "20%" },
+                        { "mData": 8, "sTitle": "Status", "sWidth": "5%" },
                         {
                             "mData": null,
                             "bSortable": false,
-                            "mRender": function (o) { return '<a href=/delete/' + o[1] + '>Delete</a>&nbsp;&nbsp;<a href=' + monit + o[1] + '>Monitor</a>' }
+                            "mRender": function (o) { return '<a href=/delete/' + o[1] + '>Delete</a>' }
+                            // "mRender": function (o) { return '<a href=/delete/' + o[1] + '>Delete</a>&nbsp;&nbsp;<a href=/edit/' + o[1] + '>Edit</a>' }
                         }
                     ]
                 });
             });
+
+            $.getJSON('/get_services_from_es', function (data) {
+                console.log(data);
+                var table = $('#services_table_es').DataTable({
+                    data: data,
+                    "paging": false,
+                    "searching": false,
+                    "aoColumns": [
+                        { "mData": 0, "sTitle": "Service", "sWidth": "15%" },
+                        { "mData": 1, "sTitle": "Name", "sWidth": "15%" },
+                        { "mData": 2, "sTitle": "Started at", "sWidth": "20%" },
+                        { "mData": 3, "sTitle": "Ending at", "sWidth": "20%" },
+                        { "mData": 4, "sTitle": "GPUs", "sWidth": "5%" },
+                        { "mData": 5, "sTitle": "Cores", "sWidth": "5%" },
+                        { "mData": 6, "sTitle": "Memory", "sWidth": "5%" },
+                    ]
+                });
+            });
+
+
 
         });
 

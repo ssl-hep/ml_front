@@ -273,7 +273,7 @@ async function users_services(owner) {
                 ram = resources.limits['memory'];
                 status = item.status.phase;
                 link = await get_service_link(item.metadata.name);
-                results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, `<a href="${link}">${link}</a>`, status])
+                results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status])
             }
         };
     } catch (err) {
@@ -573,7 +573,7 @@ app.get('/get_services_from_es', function (req, res) {
     es_client.search({
         index: 'ml_front', type: 'docs',
         body: {
-            _source: ["service", "name", "link", "timestamp", "gpus", "link", "ttl"],
+            _source: ["service", "name", "link", "timestamp", "gpus", 'cpus', 'memory', "link", "ttl"],
             query: {
                 match: {
                     "owner": req.session.sub_id
@@ -592,7 +592,7 @@ app.get('/get_services_from_es', function (req, res) {
                     console.log(obj);
                     var start_date = new Date(obj.timestamp).toUTCString();
                     var end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
-                    serv = [obj.service, obj.name, start_date, end_date, obj.gpus]
+                    serv = [obj.service, obj.name, start_date, end_date, obj.gpus, obj.cpus, obj.memory]
                     toSend.push(serv);
                 }
                 res.status(200).send(toSend);

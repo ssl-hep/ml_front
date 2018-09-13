@@ -5,6 +5,7 @@ var https = require('https');
 var http = require('http');
 
 var request = require('request');
+// const JSONStream = require('json-stream'); need for events only
 
 
 console.log('ML_front server starting ... ');
@@ -270,8 +271,9 @@ async function users_services(owner) {
                 gpus = resources.limits['nvidia.com/gpu'];
                 cpus = resources.limits['cpu'];
                 ram = resources.limits['memory'];
+                status = item.status.phase;
                 link = await get_service_link(item.metadata.name);
-                results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, `<a href="${link}">${link}</a>`])
+                results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, `<a href="${link}">${link}</a>`, status])
             }
         };
     } catch (err) {
@@ -338,14 +340,14 @@ async function get_service_link(name) {
 
 }
 
-function follow_events() {
-    const stream = client.apis.apps.v1.watch.namespaces(ml_front_config.NAMESPACE).pods.getStream();
-    const jsonStream = new JSONStream();
-    stream.pipe(jsonStream);
-    jsonStream.on('data', object => {
-        console.log('Event: ', JSON.stringify(object, null, 2));
-    });
-}
+// function follow_events() {
+//     const stream = client.apis.apps.v1.watch.namespaces(ml_front_config.NAMESPACE).pods.getStream();
+//     const jsonStream = new JSONStream();
+//     stream.pipe(jsonStream);
+//     jsonStream.on('data', object => {
+//         console.log('Event: ', JSON.stringify(object, null, 2));
+//     });
+// }
 
 async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = "12", time, repo) {
 
@@ -539,23 +541,23 @@ app.get('/delete/:jservice', function (request, response) {
     response.redirect("/index.html");
 });
 
-app.get('/resources', async function (req, res) {
-    console.log('getting available resources...');
-    try {
-        const nodes = await client.api.v1.nodes.get();
-        for (const node of nodes.body.items) {
-            console.log('node >>>', node.metadata.name);
-            console.log(node.status);
-        }
-        res.sendStatus(200);
-    } catch (err) {
-        console.log(`can't get available resources in namespace ml`);
-    }
-    rqs = await client.api.v1.namespaces(ml_front_config.NAMESPACE).resourcequotas.get();
-    console.log(rqs);
-});
+// app.get('/resources', async function (req, res) {
+//     console.log('getting available resources...');
+//     try {
+//         const nodes = await client.api.v1.nodes.get();
+//         for (const node of nodes.body.items) {
+//             console.log('node >>>', node.metadata.name);
+//             console.log(node.status);
+//         }
+//         res.sendStatus(200);
+//     } catch (err) {
+//         console.log(`can't get available resources in namespace ml`);
+//     }
+//     rqs = await client.api.v1.namespaces(ml_front_config.NAMESPACE).resourcequotas.get();
+//     console.log(rqs);
+// });
 
-app.get('/users_services', async function (req, res) {
+app.get('/get_users_services', async function (req, res) {
     console.log('user:', req.session.sub_id, 'services.');
     await users_services(req.session.sub_id)
         .then(function (resp) {
@@ -566,7 +568,7 @@ app.get('/users_services', async function (req, res) {
         });
 });
 
-app.get('/get_services', function (req, res) {
+app.get('/get_services_from_es', function (req, res) {
     console.log('user:', req.session.sub_id, 'services.');
     es_client.search({
         index: 'ml_front', type: 'docs',
@@ -590,7 +592,7 @@ app.get('/get_services', function (req, res) {
                     console.log(obj);
                     var start_date = new Date(obj.timestamp).toUTCString();
                     var end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
-                    serv = [obj.service, obj.name, start_date, end_date, obj.gpus, `<a href="${obj.link}">${obj.link}</a>`]
+                    serv = [obj.service, obj.name, start_date, end_date, obj.gpus]
                     toSend.push(serv);
                 }
                 res.status(200).send(toSend);

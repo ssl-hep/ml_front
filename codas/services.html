@@ -127,7 +127,7 @@
 
     <script type="text/javascript" language="JavaScript">
         $(document).ready(function () {
-            $.getJSON('/users_services', function (data) { // get_services
+            $.getJSON('/get_users_services', function (data) { // get_services
                 console.log(data);
                 var monit = 'https://grafana.nautilus.optiputer.net/d/7xXMBtHiz/k8s-compute-resources-pod?refresh=10s&orgId=1&var-datasource=prometheus&var-namespace=ml&var-pod='
                 var table = $('#services_table').DataTable({
@@ -135,12 +135,13 @@
                     "paging": false,
                     "searching": false,
                     "aoColumns": [
-                        { "mData": 0, "sTitle": "Service", "sWidth": "20%" },
+                        { "mData": 0, "sTitle": "Service", "sWidth": "10%" },
                         { "mData": 1, "sTitle": "Name", "sWidth": "10%" },
-                        { "mData": 2, "sTitle": "Started at", "sWidth": "20%" },
-                        { "mData": 3, "sTitle": "Ending at", "sWidth": "20%" },
+                        { "mData": 2, "sTitle": "Started at", "sWidth": "10%" },
+                        { "mData": 3, "sTitle": "Ending at", "sWidth": "10%" },
                         { "mData": 4, "sTitle": "GPUs", "sWidth": "5%" },
                         { "mData": 5, "sTitle": "Link", "sWidth": "20%" },
+                        { "mData": 6, "sTitle": "Status", "sWidth": "5%" },
                         {
                             "mData": null,
                             "bSortable": false,

@@ -40,6 +40,7 @@ http://atlas-kibana.mwt2.org/goto/7ad9cbf9627d180d24e06ac018ac6c4a
 * add cloud deployments
 * add ml-front pods monitoring info collection
 * Follow events. No alert on instance creation. Follow events and on change update ES. Add refresh button on services.html. (add status to services table: creating, status, dead... ). Remove "resources" button.
+* Move configuration from secret to config map
 * write documentation
 * new authorization plugin
   * in profile approved or not does not refresh without full log out/log in.

@@ -44,7 +44,7 @@ $(document).ready(function () {
                     contentType: 'application/json',
                     data: JSON.stringify(data),
                     success: function (link) {
-                        alert('It can take several minutes after service status changes to "running" for the service to become available.');
+                        // alert('It can take several minutes after service status changes to "running" for the service to become available.');
                         window.location.href = "services.html";
                     },
                     error: function (xhr, textStatus, errorThrown) {

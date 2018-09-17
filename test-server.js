@@ -7,14 +7,14 @@ var http = require('http');
 var request = require('request');
 
 
-console.log('ML_front server starting ... ');
+console.log('ML_front server starting on localhost:8080 ');
 
 var ml_front_config = {
     "SITENAME": "www.atlas-ml.org",
     "NAMESPACE": "ml-usatlas-org",
     "SSL": false,
     "STATIC_BASE_PATH": "ml-usatlas-org",
-    "APPROVAL_REQUIRED": true,
+    "APPROVAL_REQUIRED": false,
     "APPROVAL_EMAIL": "ivukotic@cern.ch",
     "SINGLE_INSTANCE": false,
     "PUBLIC_INSTANCE": true,
@@ -45,7 +45,7 @@ app.use(session({
 
 var es_client = new elasticsearch.Client({
     host: 'atlas-kibana.mwt2.org:9200',
-    log: 'trace'
+    log: 'error'
 });
 
 app.get('/get_services_from_es', function (req, res) {
@@ -158,9 +158,3 @@ app.use((err, req, res, next) => {
 
 
 var httpsServer = http.createServer(app).listen(8080);
-
-// http.createServer(function (req, res) {
-//     res.writeHead(302, { 'Location': 'https://' + ml_front_config.SITENAME });
-//     res.end();
-// }).listen(80);
-

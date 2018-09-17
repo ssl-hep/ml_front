@@ -42,4 +42,6 @@ http://atlas-kibana.mwt2.org/goto/7ad9cbf9627d180d24e06ac018ac6c4a
 * Move configuration from secret to config map
 * write documentation
 * TFAAS
-* script to list users
+* web site
+    * Services - running/terminated service
+    * Services - services title

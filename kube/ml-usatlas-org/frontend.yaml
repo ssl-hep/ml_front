@@ -4,7 +4,7 @@ metadata:
   name: ml-front
   namespace: ml-usatlas-org
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: ml-front.slateci.net
+    external-dns.alpha.kubernetes.io/hostname: www.atlas-ml.org
   labels:
     k8s-app: ml-front
 spec:

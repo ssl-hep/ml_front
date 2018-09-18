@@ -819,7 +819,7 @@ async function main() {
         // await cleanup("ml-personal");
         // await create_jupyter("ml-personal", "ASDF", 1, 2);
         await show_pods();
-        follow_events();
+        // follow_events();
     } catch (err) {
         console.error('Error: ', err);
     }

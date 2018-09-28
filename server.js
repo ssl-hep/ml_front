@@ -383,7 +383,7 @@ const requiresLogin = async (req, res, next) => {
 
     console.log("Authorization required - searching for: ", req.session.sub_id);
     var user = await get_user(req.session.sub_id);
-    if (user.authorized == true) {
+    if (user.approved == true) {
         console.log("authorized.");
         return next();
     };

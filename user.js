@@ -69,7 +69,7 @@ module.exports = class User {
                 body: {
                     doc: {
                         "approved_on": this.approved_on,
-                        "approved": true.approved
+                        "approved": this.approved
                     }
                 }
             });

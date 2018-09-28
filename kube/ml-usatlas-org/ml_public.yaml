@@ -32,11 +32,11 @@ spec:
       requests:
         cpu: 3
         memory: "16Gi"
-        nvidia.com/gpu: 3
+        nvidia.com/gpu: 2
       limits: 
         cpu: 6
         memory: "32Gi"
-        nvidia.com/gpu: 3 
+        nvidia.com/gpu: 2
     volumeMounts:
     - name: local-scratch
       mountPath: /data/

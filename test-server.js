@@ -1,7 +1,6 @@
 var fs = require('fs');
 
 var express = require('express');
-var https = require('https');
 var http = require('http');
 
 var request = require('request');
@@ -9,23 +8,10 @@ var request = require('request');
 
 console.log('ML_front server starting on localhost:8080 ');
 
-var ml_front_config = {
-    "SITENAME": "www.atlas-ml.org",
-    "NAMESPACE": "ml-usatlas-org",
-    "SSL": false,
-    "STATIC_BASE_PATH": "ml-usatlas-org",
-    "APPROVAL_REQUIRED": false,
-    "APPROVAL_EMAIL": "ivukotic@cern.ch",
-    "SINGLE_INSTANCE": false,
-    "PUBLIC_INSTANCE": true,
-    "MONITOR": true,
-    "TFAAS": false,
-    "REMOTE_K8S": false,
-    "REPORTING": true,
-    "JL_POD": "./jupyter-pod.json",
-    "JL_SERVICE": "./jupyter-service.json"
-}
 
+var ml_front_config = require('./kube/ml-usatlas-org/secrets/config.json');
+
+const userm = require('./user.js');
 
 var elasticsearch = require('elasticsearch');
 var session = require('express-session')
@@ -48,44 +34,20 @@ var es_client = new elasticsearch.Client({
     log: 'error'
 });
 
-app.get('/get_services_from_es', function (req, res) {
-    console.log('user:', req.session.sub_id, 'services.');
-    es_client.search({
-        index: 'ml_front', type: 'docs',
-        body: {
-            _source: ["service", "name", "link", "timestamp", "gpus", 'cpus', 'memory', "link", "ttl"],
-            query: {
-                match: {
-                    "owner": req.session.sub_id
-                }
-            },
-            sort: { "timestamp": { order: "desc" } }
-        }
-    }).then(
-        function (resp) {
-            // console.log(resp);
-            if (resp.hits.total > 0) {
-                // console.log(resp.hits.hits);
-                toSend = [];
-                for (var i = 0; i < resp.hits.hits.length; i++) {
-                    var obj = resp.hits.hits[i]._source;
-                    console.log(obj);
-                    var start_date = new Date(obj.timestamp).toUTCString();
-                    var end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
-                    serv = [obj.service, obj.name, start_date, end_date, obj.gpus, obj.cpus, obj.memory]
-                    toSend.push(serv);
-                }
-                res.status(200).send(toSend);
-            } else {
-                console.log("no services found.");
-                res.status(200).send([]);
-            }
-        },
-        function (err) {
-            console.trace(err.message);
-        });
-});
+async function get_user(id) {
+    var user = new userm();
+    user.id = id;
+    await user.load();
+    return user;
+}
 
+app.get('/get_services_from_es', async function (req, res) {
+    console.log('user:', req.session.sub_id, 'services...');
+    const user = await get_user(req.session.sub_id);
+    var services = await user.get_services();
+    console.log(services);
+    res.status(200).send(services);
+});
 
 app.get('/plugins', function (req, res) {
     // console.log('sending plugins info back.');
@@ -112,43 +74,19 @@ app.get('/user', function (req, res) {
     });
 });
 
-app.get('/users_data', function (req, res) {
-    console.log('sending profile info back.');
+app.get('/users_data', async function (req, res) {
+    console.log('Sending all users info...');
+    const user = new userm();
+    var data = await user.get_all_users();
+    res.status(200).send(data);
+    console.log('Done.')
+});
 
-    es_client.search({
-        index: 'mlfront_users', type: 'docs',
-        body: {
-            query: {
-                match: {
-                    "event": ml_front_config.NAMESPACE
-                }
-            },
-            sort: { "created_at": { order: "desc" } }
-        }
-    }).then(
-        function (resp) {
-            // console.log(resp);
-            if (resp.hits.total > 0) {
-                // console.log(resp.hits.hits);
-                toSend = [];
-                for (var i = 0; i < resp.hits.hits.length; i++) {
-                    var obj = resp.hits.hits[i]._source;
-                    console.log(obj);
-                    var created_at = new Date(obj.created_at).toUTCString();
-                    var approved_on = new Date(obj.approved_on).toUTCString();
-                    serv = [obj.user, obj.email, obj.affiliation, created_at, obj.approved, approved_on]
-                    toSend.push(serv);
-                }
-                res.status(200).send(toSend);
-            } else {
-                console.log("no users found.");
-                res.status(200).send([]);
-            }
-        },
-        function (err) {
-            console.trace(err.message);
-        });
-
+app.get('/authorize/:user_id', async function (req, res) {
+    console.log('Authorizing user...')
+    const user = await get_user(req.params.user_id);
+    user.approve();
+    res.redirect("/users.html");
 });
 
 app.use((err, req, res, next) => {
@@ -158,3 +96,47 @@ app.use((err, req, res, next) => {
 
 
 var httpsServer = http.createServer(app).listen(8080);
+
+async function main() {
+
+    const user = new userm();
+    var usrs = await user.get_all_users();
+    console.log(usrs);
+
+    user.id = "0000000-0000-0000-0000-00000000000";
+    user.affiliation = "Ilija test center";
+    user.email = "ilija@vukotic.me";
+    user.name = "Ilija Vukotic";
+    user.username = "ilijatester";
+    var found = await user.load();
+    if (found == false) {
+        await user.write();
+        user.ask_for_approval();
+        await user.approve();
+        user.print();
+
+        const u = await get_user("0000000-0000-0000-0000-00000000000");
+        var service_description = {
+            service: "Private JupyterLab",
+            name: "req.body.name",
+            ttl: 1,
+            gpus: 0,
+            cpus: 0,
+            memory: 0,
+            link: "res.link",
+            repository: "req.body.repository"
+        };
+        await u.add_service(service_description);
+
+
+        var services = await u.get_services();
+        console.log(services);
+    } else {
+        user.print();
+        await user.delete();
+    }
+
+
+}
+
+main();

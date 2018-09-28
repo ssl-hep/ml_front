@@ -14,6 +14,8 @@ console.log('config load ... ');
 var ml_front_config = require('/etc/ml-front-conf/mlfront-config.json');
 console.log(ml_front_config);
 
+const userm = require('./user.js');
+
 var privateKey = fs.readFileSync('/etc/https-certs/key.pem');//, 'utf8'
 var certificate = fs.readFileSync('/etc/https-certs/cert.pem');
 
@@ -21,10 +23,6 @@ var credentials = { key: privateKey, cert: certificate };
 
 var elasticsearch = require('elasticsearch');
 var session = require('express-session')
-
-var mg_config = require('/etc/mg-conf/config.json');
-var mailgun = require('mailgun-js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
-
 
 // App
 const app = express();
@@ -54,118 +52,6 @@ var auth = "Basic " + new Buffer(globConf.CLIENT_ID + ":" + globConf.CLIENT_SECR
 // app.use(function (req, res, next) {
 //     next();
 // })
-
-
-// Elasticsearch
-
-var es_client = new elasticsearch.Client({
-    host: 'atlas-kibana.mwt2.org:9200',
-    log: 'trace'
-});
-
-async function es_check_user_authorized(user_info) {
-    try {
-        const response = await es_client.search({
-            index: "mlfront_users", type: "docs",
-            body: {
-                query: {
-                    bool: {
-                        must: [
-                            {
-                                match: {
-                                    "event": ml_front_config.NAMESPACE
-                                }
-                            },
-                            {
-                                match: {
-                                    "_id": user_info.sub
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-        });
-        console.log(response);
-        if (response.hits.total == 0) {
-            console.log("user not found...");
-            await es_create_user(user_info);
-            return await es_check_user_authorized(user_info);
-        }
-        else {
-            console.log("user was found and authorization was: ", response.hits.hits[0]._source.approved);
-            return response.hits.hits[0]._source.approved;
-        };
-    } catch (err) {
-        console.error(err)
-    }
-};
-
-async function es_create_user(user_info) {
-    try {
-        const response = await es_client.index({
-            index: 'mlfront_users',
-            type: 'docs',
-            id: user_info.sub,
-            refresh: true,
-            body: {
-                "username": user_info.preferred_username,
-                "affiliation": user_info.organization,
-                "user": user_info.name,
-                "email": user_info.email,
-                "event": ml_front_config.NAMESPACE,
-                "created_at": new Date().getTime(),
-                "approved": !ml_front_config.APPROVAL_REQUIRED
-            }
-        });
-        console.log(response);
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-function ask_for_approval(user_info) {
-
-    if (ml_front_config.APPROVAL_REQUIRED == true) {
-        if (ml_front_config.hasOwnProperty("APPROVAL_EMAIL")) {
-
-            link = 'https://' + ml_front_config.SITENAME + '/authorize/' + user_info.sub;
-            data = {
-                from: ml_front_config.NAMESPACE + "<" + ml_front_config.NAMESPACE + "@maniac.uchicago.edu>",
-                to: ml_front_config.APPROVAL_EMAIL,
-                subject: "Authorization requested",
-                text: "Dear Sir/Madamme, \n\n\t" + user_info.name +
-                    " affiliated with " + user_info.organization +
-                    " requested access to " + ml_front_config.NAMESPACE +
-                    " ML front.\n\tTo approve it use this link " + link +
-                    ". To deny the request simply delete this mail.\n\nBest regards,\n\tML front Approval system"
-            }
-
-            mailgun.messages().send(data, function (error, body) {
-                console.log(body);
-            });
-
-        }
-        else {
-            console.error("Approval person's mail or mailgun key not configured.");
-        }
-    }
-}
-
-function test_ES_connection() {
-    es_client.ping({
-        requestTimeout: 30000,
-    }).then(all_is_well, all_is_not_well);
-}
-
-function all_is_well(err, resp, stat) {
-    console.log('All is well');
-}
-
-function all_is_not_well(err, resp, stat) {
-    console.error('elasticsearch cluster is down!');
-    process.exit(1);
-}
 
 async function configureKube() {
     try {
@@ -202,6 +88,13 @@ async function configureRemoteKube(cluster_url, admin, adminpass) {
         process.exit(2);
     }
 
+}
+
+async function get_user(id) {
+    var user = new userm();
+    user.id = id;
+    await user.load();
+    return user;
 }
 
 async function cleanup(name) {
@@ -457,27 +350,18 @@ const fullHandler = async (req, res, next) => {
 
     try {
         res.link = await get_service_link(req.body.name);
-
-        es_client.index({
-            index: 'ml_front', type: 'docs',
-            body: {
-                "service": "Private JupyterLab",
-                "name": req.body.name,
-                "owner": req.session.sub_id,
-                "user": req.session.name,
-                "ttl": req.body.time,
-                "timestamp": new Date().getTime(),
-                "gpus": req.body.gpus,
-                "cpus": req.body.cpus,
-                "memory": req.body.memory,
-                "gpus": req.body.gpus,
-                "link": res.link,
-                "repository": req.body.repository
-            }
-        }, function (err, resp, status) {
-            console.log("from ES indexer:", resp);
-        });
-
+        const user = await get_user(req.session.sub_id);
+        var service_description = {
+            service: "Private JupyterLab",
+            name: req.body.name,
+            ttl: req.body.time,
+            gpus: req.body.gpus,
+            cpus: req.body.cpus,
+            memory: req.body.memory,
+            link: res.link,
+            repository: req.body.repository
+        };
+        await user.add_service(service_description);
         next();
     } catch (err) {
         console.log("Some error in getting service link.", err)
@@ -494,45 +378,19 @@ const requiresLogin = (req, res, next) => {
         return next(err);
     }
 
-    if (ml_front_config.APPROVAL_REQUIRED == true) {
-
-        console.log("Authorization required - searching for: ", req.session.sub_id);
-
-        es_client.search({
-            index: "mlfront_users", type: "docs",
-            body: {
-                size: 1,
-                query: {
-                    bool: {
-                        must: [
-                            { match: { event: ml_front_config.NAMESPACE } },
-                            { match: { _id: req.session.sub_id } },
-                            { match: { approved: true } }
-                        ]
-                    }
-                }
-            }
-        }, function (error, response, status) {
-            if (error) {
-                console.log("search error: " + error);
-                return "not authorized. Server error."
-            }
-            else {
-                if (response.hits.total == 1) {
-                    console.log("authorized.");
-                    return next();
-                };
-                var err = new Error('You must be authorized for this service.');
-                err.status = 403;
-                return next(err);
-            }
-        });
-    } else {
-        // authorization not required
+    if (ml_front_config.APPROVAL_REQUIRED == false)
         return next();
-    }
-}
 
+    console.log("Authorization required - searching for: ", req.session.sub_id);
+    const user = await get_user(req.session.sub_id);
+    if (user.authorized == true) {
+        console.log("authorized.");
+        return next();
+    };
+    var err = new Error('You must be authorized for this service.');
+    err.status = 403;
+    return next(err);
+}
 
 
 app.get('/delete/:jservice', function (request, response) {
@@ -540,22 +398,6 @@ app.get('/delete/:jservice', function (request, response) {
     cleanup(jservice);
     response.redirect("/index.html");
 });
-
-// app.get('/resources', async function (req, res) {
-//     console.log('getting available resources...');
-//     try {
-//         const nodes = await client.api.v1.nodes.get();
-//         for (const node of nodes.body.items) {
-//             console.log('node >>>', node.metadata.name);
-//             console.log(node.status);
-//         }
-//         res.sendStatus(200);
-//     } catch (err) {
-//         console.log(`can't get available resources in namespace ml`);
-//     }
-//     rqs = await client.api.v1.namespaces(ml_front_config.NAMESPACE).resourcequotas.get();
-//     console.log(rqs);
-// });
 
 app.get('/get_users_services', async function (req, res) {
     console.log('user:', req.session.sub_id, 'services.');
@@ -568,42 +410,12 @@ app.get('/get_users_services', async function (req, res) {
         });
 });
 
-app.get('/get_services_from_es', function (req, res) {
-    console.log('user:', req.session.sub_id, 'services.');
-    es_client.search({
-        index: 'ml_front', type: 'docs',
-        body: {
-            _source: ["service", "name", "link", "timestamp", "gpus", 'cpus', 'memory', "link", "ttl"],
-            query: {
-                match: {
-                    "owner": req.session.sub_id
-                }
-            },
-            sort: { "timestamp": { order: "desc" } }
-        }
-    }).then(
-        function (resp) {
-            // console.log(resp);
-            if (resp.hits.total > 0) {
-                // console.log(resp.hits.hits);
-                toSend = [];
-                for (var i = 0; i < resp.hits.hits.length; i++) {
-                    var obj = resp.hits.hits[i]._source;
-                    console.log(obj);
-                    var start_date = new Date(obj.timestamp).toUTCString();
-                    var end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
-                    serv = [obj.service, obj.name, start_date, end_date, obj.gpus, obj.cpus, obj.memory]
-                    toSend.push(serv);
-                }
-                res.status(200).send(toSend);
-            } else {
-                console.log("no services found.");
-                res.status(200).send([]);
-            }
-        },
-        function (err) {
-            console.trace(err.message);
-        });
+app.get('/get_services_from_es', async function (req, res) {
+    console.log('user:', req.session.sub_id, 'services...');
+    const user = await get_user(req.session.sub_id);
+    var services = await user.get_services();
+    console.log(services);
+    res.status(200).send(services);
 });
 
 app.get('/healthz', function (req, res) {
@@ -708,15 +520,20 @@ app.get('/authcallback', (req, res) => {
                 console.log('error on geting username:\t', error);
             }
             console.log('body:\t', body);
-            req.session.authorized = await es_check_user_authorized(body);
-            if (req.session.authorized == false) {
-                ask_for_approval(body);
+            const user = new userm();
+            user.id = req.session.sub_id = body.sub;
+            user.username = req.session.username = body.preferred_username;
+            user.affiliation = req.session.organization = body.organization;
+            user.name = req.session.name = body.name;
+            user.email = req.session.email = body.email;
+            var found = await user.load();
+            if (found == false) {
+                await user.write();
             }
-            req.session.sub_id = body.sub;
-            req.session.username = body.preferred_username;
-            req.session.organization = body.organization;
-            req.session.name = body.name;
-            req.session.email = body.email;
+            req.session.authorized = user.approved;
+            if (user.approved == false) {
+                user.ask_for_approval();
+            }
             res.redirect("index.html");
         });
 
@@ -738,63 +555,18 @@ app.get('/user', function (req, res) {
     });
 });
 
-app.get('/users_data', function (req, res) {
-    console.log('sending profile info back.');
-
-    es_client.search({
-        index: 'mlfront_users', type: 'docs',
-        body: {
-            query: {
-                match: {
-                    "event": ml_front_config.NAMESPACE
-                }
-            },
-            sort: { "created_at": { order: "desc" } }
-        }
-    }).then(
-        function (resp) {
-            // console.log(resp);
-            if (resp.hits.total > 0) {
-                // console.log(resp.hits.hits);
-                toSend = [];
-                for (var i = 0; i < resp.hits.hits.length; i++) {
-                    var obj = resp.hits.hits[i]._source;
-                    console.log(obj);
-                    var created_at = new Date(obj.created_at).toUTCString();
-                    var approved_on = new Date(obj.approved_on).toUTCString();
-                    serv = [obj.user, obj.email, obj.affiliation, created_at, obj.approved, approved_on]
-                    toSend.push(serv);
-                }
-                res.status(200).send(toSend);
-            } else {
-                console.log("no users found.");
-                res.status(200).send([]);
-            }
-        },
-        function (err) {
-            console.trace(err.message);
-        });
-
+app.get('/users_data', async function (req, res) {
+    console.log('Sending all users info...');
+    const user = new userm();
+    var data = await user.get_all_users();
+    res.status(200).send(data);
+    console.log('Done.')
 });
 
 app.get('/authorize/:user_id', async function (req, res) {
-    var user_id = req.params.user_id;
-    try {
-        const response = await es_client.update({
-            index: 'mlfront_users',
-            type: 'docs',
-            id: user_id,
-            body: {
-                doc: {
-                    "approved_on": new Date().getTime(),
-                    "approved": true
-                }
-            }
-        });
-        console.log(response);
-    } catch (err) {
-        console.error(err)
-    }
+    console.log('Authorizing user...')
+    const user = await get_user(req.params.user_id);
+    user.approve();
     res.redirect("/users.html");
 });
 
@@ -816,10 +588,7 @@ async function main() {
 
     try {
         await configureKube();
-        // await cleanup("ml-personal");
-        // await create_jupyter("ml-personal", "ASDF", 1, 2);
         await show_pods();
-        // follow_events();
     } catch (err) {
         console.error('Error: ', err);
     }

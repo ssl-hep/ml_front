@@ -369,7 +369,7 @@ const fullHandler = async (req, res, next) => {
     };
 }
 
-const requiresLogin = (req, res, next) => {
+const requiresLogin = async (req, res, next) => {
     // to be used as middleware
 
     if (req.session.loggedIn !== true) {

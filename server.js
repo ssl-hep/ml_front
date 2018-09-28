@@ -350,7 +350,7 @@ const fullHandler = async (req, res, next) => {
 
     try {
         res.link = await get_service_link(req.body.name);
-        const user = await get_user(req.session.sub_id);
+        var user = await get_user(req.session.sub_id);
         var service_description = {
             service: "Private JupyterLab",
             name: req.body.name,
@@ -382,7 +382,7 @@ const requiresLogin = async (req, res, next) => {
         return next();
 
     console.log("Authorization required - searching for: ", req.session.sub_id);
-    const user = await get_user(req.session.sub_id);
+    var user = await get_user(req.session.sub_id);
     if (user.authorized == true) {
         console.log("authorized.");
         return next();
@@ -412,7 +412,7 @@ app.get('/get_users_services', async function (req, res) {
 
 app.get('/get_services_from_es', async function (req, res) {
     console.log('user:', req.session.sub_id, 'services...');
-    const user = await get_user(req.session.sub_id);
+    var user = await get_user(req.session.sub_id);
     var services = await user.get_services();
     console.log(services);
     res.status(200).send(services);
@@ -565,7 +565,7 @@ app.get('/users_data', async function (req, res) {
 
 app.get('/authorize/:user_id', async function (req, res) {
     console.log('Authorizing user...')
-    const user = await get_user(req.params.user_id);
+    var user = await get_user(req.params.user_id);
     user.approve();
     res.redirect("/users.html");
 });

@@ -183,6 +183,26 @@ module.exports = class User {
         }
     };
 
+    async terminate_service(name) {
+        console.log('terminating service in ES: ', name, 'owned by', this.id);
+        console.log('not implemented yet.');
+        // try {
+        //     const response = await this.es.update({
+        //         index: 'ml_front', type: 'docs', id: this.id,
+        //         body: {
+        //             doc: {
+        //                 "terminated_on": new Date().getTime(),
+        //                 "terminated": true
+        //             }
+        //         }
+        //     });
+        //     console.log(response);
+        // } catch (err) {
+        //     console.error(err)
+        // }
+        console.log("Done.");
+    };
+
     async get_services() {
         console.log('getting all services of this user...');
         try {

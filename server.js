@@ -22,7 +22,7 @@ var certificate = fs.readFileSync('/etc/https-certs/cert.pem');
 var credentials = { key: privateKey, cert: certificate };
 
 var elasticsearch = require('elasticsearch');
-var session = require('express-session')
+var session = require('express-session');
 
 // App
 const app = express();
@@ -33,7 +33,7 @@ app.use(express.json());       // to support JSON-encoded bodies
 app.use(session({
     secret: 'mamicu mu njegovu', resave: false,
     saveUninitialized: true, cookie: { secure: false, maxAge: 3600000 }
-}))
+}));
 
 // k8s stuff
 const Client = require('kubernetes-client').Client;
@@ -75,11 +75,11 @@ async function configureRemoteKube(cluster_url, admin, adminpass) {
                 url: cluster_url,
                 auth: {
                     user: admin,
-                    pass: adminpass,
+                    pass: adminpass
                 },
-                insecureSkipTlsVerify: true,
+                insecureSkipTlsVerify: true
             }
-        })
+        });
         await client.loadSpec();
         console.log("client configured");
         return client;
@@ -106,7 +106,7 @@ async function cleanup(name) {
         console.warn(`Unable to delete pod ${name}.  Skipping.`);
     }
 
-    while (await get_pod_state(name).catch() == 'running') {
+    while (await get_pod_state(name).catch() === 'running') {
         console.log('still alive. waiting.');
         await new Promise(resolve => setTimeout(resolve, 1000));
     }
@@ -147,15 +147,15 @@ async function show_pods() {
 
 async function users_services(owner) {
     console.log("all user's pods in ml namespace", owner);
-    results = []
+    results = [];
     try {
         const pods = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods.get();
         for (const item of pods.body.items) {
 
-            if (item.metadata.labels == undefined) {
+            if (item.metadata.labels === undefined) {
                 continue;
             }
-            if (item.metadata.labels.owner == owner) {
+            if (item.metadata.labels.owner === owner) {
                 resources = item.spec.containers[0].resources;
                 console.log(resources);
                 crt = Date.parse(item.metadata.creationTimestamp); //number
@@ -166,9 +166,9 @@ async function users_services(owner) {
                 ram = resources.limits['memory'];
                 status = item.status.phase;
                 link = await get_service_link(item.metadata.name);
-                results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status])
+                results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status]);
             }
-        };
+        }
     } catch (err) {
         console.log("can't show all pods in namespace ml", err);
     }
@@ -178,10 +178,10 @@ async function users_services(owner) {
 async function enforce_time2delete() {
     const pods = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods.get();
     for (item of pods.body.items) {
-        if (item.metadata.labels == undefined) {
+        if (item.metadata.labels === undefined) {
             continue;
         }
-        if (item.metadata.labels['k8s-app'] == 'ml-personal') {
+        if (item.metadata.labels['k8s-app'] === 'ml-personal') {
             // console.log(item.metadata);
             ttd = parseInt(item.metadata.labels.time2delete.replace('ttl-', ''));
             crt = Date.parse(item.metadata.creationTimestamp);
@@ -192,7 +192,7 @@ async function enforce_time2delete() {
                 console.log('name:', item.metadata.name, " remaining time: ", (crt + ttd * 86400 * 1000 - Date.now()) / 3600000, ' hours.');
             }
         }
-    };
+    }
 }
 
 async function get_pod_state(name) {
@@ -221,7 +221,7 @@ async function get_service_link(name) {
             console.log(service.body.spec.ports);
             link = service.body.metadata.labels.servingat;
             port = service.body.spec.ports[0].nodePort;
-            if (ml_front_config.SSL == true) {
+            if (ml_front_config.SSL === true) {
                 return `https://${link}:${port}`;
             } else {
                 return `http://${link}:${port}`;
@@ -266,9 +266,9 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = "12", ti
         await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods.post({ body: jupyterPodManifest });
     } catch (err) {
         console.error("Error in creating jupyter pod:  " + err);
-        var err = new Error("Error in creating jupyter pod:  " + err);
-        err.status = 500;
-        return err;
+        error = new Error("Error in creating jupyter pod:  " + err);
+        error.status = 500;
+        return error;
     }
 
     if (ml_front_config.hasOwnProperty('JL_INGRESS')) {
@@ -283,9 +283,9 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = "12", ti
             await client.apis.extensions.v1beta1.namespaces(ml_front_config.NAMESPACE).ingresses.post({ body: jupyterIngressManifest });
         } catch (err) {
             console.error("Error in creating jupyter ingress:  " + err);
-            var err = new Error("Error in creating jupyter ingress:  " + err);
-            err.status = 500;
-            return err;
+            error = new Error("Error in creating jupyter ingress:  " + err);
+            error.status = 500;
+            return error;
         }
     }
 
@@ -298,17 +298,17 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = "12", ti
         await client.api.v1.namespaces(ml_front_config.NAMESPACE).services.post({ body: jupyterServiceManifest });
     } catch (err) {
         console.error("Error in creating jupyter service:  " + err);
-        var err = new Error("Error in creating jupyter service:  " + err);
-        err.status = 500;
-        return err;
+        error = new Error("Error in creating jupyter service:  " + err);
+        error.status = 500;
+        return error;
     }
 
-    console.log(`Jupyter and service ${name} successfully deployed.`)
+    console.log(`Jupyter and service ${name} successfully deployed.`);
 }
 
 const parameterChecker = (req, res, next) => {
-    if (req.body == 'undefined' || req.body == null) {
-        res.status(400).send('nothing POSTed.')
+    if (req.body === 'undefined' || req.body === null) {
+        res.status(400).send('nothing POSTed.');
         return;
     }
 
@@ -333,7 +333,7 @@ const parameterChecker = (req, res, next) => {
         res.sendStatus(400).send('not all parameters POSTed.');
         return;
     }
-}
+};
 
 const fullHandler = async (req, res, next) => {
     await cleanup(req.body.name);
@@ -344,9 +344,9 @@ const fullHandler = async (req, res, next) => {
             req.body.name, req.body.password,
             req.body.gpus, req.body.cpus, req.body.memory, req.body.time, req.body.repository);
     } catch (err) {
-        console.log("Some error in creating jupyter.", err)
+        console.log("Some error in creating jupyter.", err);
         res.status(500).send('Some error in creating your JupyterLab.');
-    };
+    }
 
     try {
         res.link = await get_service_link(req.body.name);
@@ -364,33 +364,33 @@ const fullHandler = async (req, res, next) => {
         await user.add_service(service_description);
         next();
     } catch (err) {
-        console.log("Some error in getting service link.", err)
+        console.log("Some error in getting service link.", err);
         res.status(500).send('Some error in creating your JupyterLab.');
-    };
-}
+    }
+};
 
 const requiresLogin = async (req, res, next) => {
     // to be used as middleware
 
     if (req.session.loggedIn !== true) {
-        var err = new Error('You must be logged in to view this page.');
-        err.status = 403;
-        return next(err);
+        error = new Error('You must be logged in to view this page.');
+        error.status = 403;
+        return next(error);
     }
 
-    if (ml_front_config.APPROVAL_REQUIRED == false)
+    if (ml_front_config.APPROVAL_REQUIRED === false)
         return next();
 
     console.log("Authorization required - searching for: ", req.session.sub_id);
     var user = await get_user(req.session.sub_id);
-    if (user.approved == true) {
+    if (user.approved === true) {
         console.log("authorized.");
         return next();
-    };
-    var err = new Error('You must be authorized for this service.');
-    err.status = 403;
-    return next(err);
-}
+    }
+    error = new Error('You must be authorized for this service.');
+    error.status = 403;
+    return next(error);
+};
 
 
 app.get('/delete/:jservice', function (request, response) {
@@ -495,7 +495,7 @@ app.get('/authcallback', (req, res) => {
 
     let requestOptions = {
         uri: red, method: 'POST', headers: { "Authorization": auth }, json: true
-    }
+    };
 
     // console.log(requestOptions);
 
@@ -513,7 +513,7 @@ app.get('/authcallback', (req, res) => {
         let idrequestOptions = {
             uri: id_red, method: 'POST', json: true,
             headers: { "Authorization": `Bearer ${body.access_token}` }
-        }
+        };
 
         request.post(idrequestOptions, async function (error, response, body) {
             if (error) {
@@ -527,11 +527,11 @@ app.get('/authcallback', (req, res) => {
             user.name = req.session.name = body.name;
             user.email = req.session.email = body.email;
             var found = await user.load();
-            if (found == false) {
+            if (found === false) {
                 await user.write();
             }
             req.session.authorized = user.approved;
-            if (user.approved == false) {
+            if (user.approved === false) {
                 user.ask_for_approval();
             }
             res.redirect("index.html");
@@ -560,11 +560,11 @@ app.get('/users_data', async function (req, res) {
     const user = new userm();
     var data = await user.get_all_users();
     res.status(200).send(data);
-    console.log('Done.')
+    console.log('Done.');
 });
 
 app.get('/authorize/:user_id', async function (req, res) {
-    console.log('Authorizing user...')
+    console.log('Authorizing user...');
     var user = await get_user(req.params.user_id);
     user.approve();
     res.redirect("/users.html");

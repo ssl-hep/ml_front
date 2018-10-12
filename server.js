@@ -161,9 +161,9 @@ async function users_services(owner) {
                 crt = Date.parse(item.metadata.creationTimestamp); //number
                 ttl = parseInt(item.metadata.labels.time2delete.replace('ttl-', ''));
                 endingat = new Date(crt + ttl * 86400000).toUTCString();
-                gpus = resources.limits['nvidia.com/gpu'];
-                cpus = resources.limits['cpu'];
-                ram = resources.limits['memory'];
+                gpus = resources.requests['nvidia.com/gpu'];
+                cpus = resources.requests['cpu'];
+                ram = resources.requests['memory'];
                 status = item.status.phase;
                 link = await get_service_link(item.metadata.name);
                 results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status]);
@@ -256,9 +256,9 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = "12", ti
         jupyterPodManifest.spec.containers[0].resources.requests["nvidia.com/gpu"] = gpu;
         jupyterPodManifest.spec.containers[0].resources.limits["nvidia.com/gpu"] = gpu;
         jupyterPodManifest.spec.containers[0].resources.requests["memory"] = memory + "Gi";
-        jupyterPodManifest.spec.containers[0].resources.limits["memory"] = memory + "Gi";
+        jupyterPodManifest.spec.containers[0].resources.limits["memory"] = 2 * memory + "Gi";
         jupyterPodManifest.spec.containers[0].resources.requests["cpu"] = cpu;
-        jupyterPodManifest.spec.containers[0].resources.limits["cpu"] = cpu;
+        jupyterPodManifest.spec.containers[0].resources.limits["cpu"] = 2 * cpu;
         jupyterPodManifest.spec.containers[0].args[2] = pass;
         jupyterPodManifest.spec.containers[0].args[3] = repo;
         jupyterPodManifest.spec.serviceAccountName = ml_front_config.NAMESPACE + '-fronter';
@@ -578,6 +578,7 @@ app.use((err, req, res, next) => {
 
 var httpsServer = https.createServer(credentials, app).listen(443);
 
+// redirects if someone comes on http.
 http.createServer(function (req, res) {
     res.writeHead(302, { 'Location': 'https://' + ml_front_config.SITENAME });
     res.end();

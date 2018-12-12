@@ -253,6 +253,7 @@ module.exports = class User {
             const resp = await this.es.search({
                 index: 'mlfront_users', type: 'docs',
                 body: {
+                    size: 1000,
                     query: { match: { "event": config.NAMESPACE } },
                     sort: { "created_at": { order: "desc" } }
                 }

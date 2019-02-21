@@ -27,6 +27,9 @@ app.use(session({
     saveUninitialized: true, cookie: { secure: false, maxAge: 3600000 }
 }))
 
+require('./routes/user')(app);
+require('./routes/spark')(app);
+require('./routes/jupyter')(app);
 // Elasticsearch
 
 var es_client = new elasticsearch.Client({
@@ -113,43 +116,42 @@ var httpsServer = http.createServer(app).listen(8080);
 
 async function main() {
 
-    const user = new userm();
-    var usrs = await user.get_all_users();
-    console.log(usrs);
+    // const user = new userm();
+    // var usrs = await user.get_all_users();
+    // console.log(usrs);
 
-    user.id = "0000000-0000-0000-0000-00000000000";
-    user.affiliation = "Ilija test center";
-    user.email = "ilija@vukotic.me";
-    user.name = "Ilija Vukotic";
-    user.username = "ilijatester";
-    var found = await user.load();
-    if (found == false) {
-        await user.write();
-        user.ask_for_approval();
-        await user.approve();
-        user.print();
+    // user.id = "0000000-0000-0000-0000-00000000000";
+    // user.affiliation = "Ilija test center";
+    // user.email = "ilija@vukotic.me";
+    // user.name = "Ilija Vukotic";
+    // user.username = "ilijatester";
+    // var found = await user.load();
+    // if (found == false) {
+    //     await user.write();
+    //     user.ask_for_approval();
+    //     await user.approve();
+    //     user.print();
 
-        const u = await get_user("0000000-0000-0000-0000-00000000000");
-        var service_description = {
-            service: "Private JupyterLab",
-            name: "req.body.name",
-            ttl: 1,
-            gpus: 0,
-            cpus: 0,
-            memory: 0,
-            link: "res.link",
-            repository: "req.body.repository"
-        };
-        await u.add_service(service_description);
+    //     const u = await get_user("0000000-0000-0000-0000-00000000000");
+    //     var service_description = {
+    //         service: "Private JupyterLab",
+    //         name: "req.body.name",
+    //         ttl: 1,
+    //         gpus: 0,
+    //         cpus: 0,
+    //         memory: 0,
+    //         link: "res.link",
+    //         repository: "req.body.repository"
+    //     };
+    //     await u.add_service(service_description);
 
 
-        var services = await u.get_services();
-        console.log(services);
-    } else {
-        user.print();
-        await user.delete();
-    }
-
+    //     var services = await u.get_services();
+    //     console.log(services);
+    // } else {
+    //     user.print();
+    //     await user.delete();
+    // }
 
 }
 

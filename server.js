@@ -35,6 +35,10 @@ app.use(session({
     saveUninitialized: true, cookie: { secure: false, maxAge: 3600000 }
 }));
 
+require('./routes/user')(app);
+require('./routes/spark')(app);
+require('./routes/jupyter')(app);
+
 // k8s stuff
 const Client = require('kubernetes-client').Client;
 const config = require('kubernetes-client').config;
@@ -369,6 +373,103 @@ const fullHandler = async (req, res, next) => {
     }
 };
 
+async function create_spark_pod(owner, name, path, executors) {
+
+    console.log("Starting spark job: ", name, path, executors);
+
+    try {
+        const sparkPodManifest = require(ml_front_config.SPARK_POD);
+        sparkPodManifest.metadata.name = name;
+        sparkPodManifest.metadata.namespace = ml_front_config.NAMESPACE;
+        sparkPodManifest.metadata.labels["instance"] = name;
+        sparkPodManifest.metadata.labels["owner"] = owner;
+        // sparkPodManifest.spec.containers[0].resources.requests["memory"] = memory + "Gi";
+        // sparkPodManifest.spec.containers[0].resources.limits["memory"] = 2 * memory + "Gi";
+        // sparkPodManifest.spec.containers[0].resources.requests["cpu"] = cpu;
+        // sparkPodManifest.spec.containers[0].resources.limits["cpu"] = 2 * cpu;
+
+        // sparkPodManifest.spec.containers[0].args[2] = pass;
+        // sparkPodManifest.spec.containers[0].args[3] = repo;
+        // sparkPodManifest.spec.serviceAccountName = ml_front_config.NAMESPACE + '-fronter';
+
+        await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods.post({ body: sparkPodManifest });
+    } catch (err) {
+        console.error("Error in creating spark pod:  " + err);
+        error = new Error("Error in creating spark pod:  " + err);
+        error.status = 500;
+        return error;
+    }
+
+    // if (ml_front_config.hasOwnProperty('JL_INGRESS')) {
+    //     try {
+    //         jupyterIngressManifest = require(ml_front_config.JL_INGRESS);
+    //         jupyterIngressManifest.metadata.name = name;
+    //         jupyterIngressManifest.metadata.labels["instance"] = name;
+    //         link = ml_front_config.SITENAME;
+    //         to_replace = link.split(".", 1);
+    //         jupyterIngressManifest.spec.rules[0].host = link.replace(to_replace, name);
+    //         jupyterIngressManifest.spec.rules[0].http.paths[0].backend.serviceName = name;
+    //         await client.apis.extensions.v1beta1.namespaces(ml_front_config.NAMESPACE).ingresses.post({ body: jupyterIngressManifest });
+    //     } catch (err) {
+    //         console.error("Error in creating jupyter ingress:  " + err);
+    //         error = new Error("Error in creating jupyter ingress:  " + err);
+    //         error.status = 500;
+    //         return error;
+    //     }
+    // }
+
+    // try {
+    //     jupyterServiceManifest = require(ml_front_config.JL_SERVICE);
+    //     jupyterServiceManifest.metadata.name = name;
+    //     jupyterServiceManifest.metadata.namespace = ml_front_config.NAMESPACE;
+    //     jupyterServiceManifest.metadata.labels["instance"] = name;
+    //     jupyterServiceManifest.spec.selector["instance"] = name;
+    //     await client.api.v1.namespaces(ml_front_config.NAMESPACE).services.post({ body: jupyterServiceManifest });
+    // } catch (err) {
+    //     console.error("Error in creating jupyter service:  " + err);
+    //     error = new Error("Error in creating jupyter service:  " + err);
+    //     error.status = 500;
+    //     return error;
+    // }
+
+    console.log(`Spark pod ${name} successfully deployed.`);
+}
+
+const sparkCreator = async (req, res, next) => {
+    // TO DO - kill previous job if there.
+    // await cleanup(req.body.name);
+
+    try {
+        await create_spark_pod(
+            req.session.sub_id,
+            req.body.name, req.body.exe_path,
+            req.body.executors);
+    } catch (err) {
+        console.log("Some error in creating spark pod.", err);
+        res.status(500).send('Some error in creating your spark pod.');
+    }
+
+    // try {
+    //     res.link = await get_service_link(req.body.name);
+    //     var user = await get_user(req.session.sub_id);
+    //     var service_description = {
+    //         service: "Private JupyterLab",
+    //         name: req.body.name,
+    //         ttl: req.body.time,
+    //         gpus: req.body.gpus,
+    //         cpus: req.body.cpus,
+    //         memory: req.body.memory,
+    //         link: res.link,
+    //         repository: req.body.repository
+    //     };
+    //     await user.add_service(service_description);
+    //     next();
+    // } catch (err) {
+    //     console.log("Some error in getting service link.", err);
+    //     res.status(500).send('Some error in creating your JupyterLab.');
+    // }
+};
+
 const requiresLogin = async (req, res, next) => {
     // to be used as middleware
 
@@ -399,16 +500,7 @@ app.get('/delete/:jservice', function (request, response) {
     response.redirect("/index.html");
 });
 
-app.get('/get_users_services', async function (req, res) {
-    console.log('user:', req.session.sub_id, 'services.');
-    await users_services(req.session.sub_id)
-        .then(function (resp) {
-            console.log(resp);
-            res.status(200).send(resp);
-        }, function (err) {
-            console.trace(err.message);
-        });
-});
+
 
 app.get('/get_services_from_es', async function (req, res) {
     console.log('user:', req.session.sub_id, 'services...');
@@ -444,13 +536,17 @@ app.post('/jupyter', requiresLogin, parameterChecker, fullHandler, (req, res) =>
     res.status(200).send(res.link);
 });
 
+app.post('/spark', requiresLogin, sparkCreator, (req, res) => {
+    console.log('Spark job created!');
+    res.status(200).send("OK");
+});
+
 app.get('/login', (req, res) => {
     console.log('Logging in');
     red = `${globConf.AUTHORIZE_URI}?scope=urn%3Aglobus%3Aauth%3Ascope%3Aauth.globus.org%3Aview_identities+openid+email+profile&state=garbageString&redirect_uri=${globConf.redirect_link}&response_type=code&client_id=${globConf.CLIENT_ID}`;
     // console.log('redirecting to:', red);
     res.redirect(red);
 });
-
 
 app.get('/logout', function (req, res, next) {
 
@@ -541,28 +637,6 @@ app.get('/authcallback', (req, res) => {
 
     });
 
-});
-
-app.get('/user', function (req, res) {
-    console.log('sending profile info back.');
-
-    res.json({
-        loggedIn: req.session.loggedIn,
-        name: req.session.name,
-        email: req.session.email,
-        username: req.session.username,
-        organization: req.session.organization,
-        user_id: req.session.sub_id,
-        authorized: req.session.authorized
-    });
-});
-
-app.get('/users_data', async function (req, res) {
-    console.log('Sending all users info...');
-    const user = new userm();
-    var data = await user.get_all_users();
-    res.status(200).send(data);
-    console.log('Done.');
 });
 
 app.get('/authorize/:user_id', async function (req, res) {

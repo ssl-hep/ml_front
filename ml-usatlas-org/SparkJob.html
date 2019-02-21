@@ -16,25 +16,29 @@
     <title>ATLAS Machine Learning platform</title>
 
     <!-- {# CSS files #} -->
-    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" />
     <link href="css/style.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
-        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
+        integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
     <!-- {# Custom Fonts #} -->
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet"
+        type="text/css">
+    <link
+        href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
         rel='stylesheet' type='text/css'>
 
     <!-- {# JavaScript files #} -->
     <!-- Bootstrap core JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
 
     <!-- Plugin JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.compatibility.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.compatibility.min.js"></script>
 
     <!-- Tables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
@@ -59,9 +63,10 @@
                     <div class="col-lg-5 mx-auto">
                         <h2>Spark Job</h2>
                         <p class="lead">
-                            Execute Spark jobs quickly and painlessly.  
+                            Execute Spark jobs quickly and painlessly.
                         </p>
-                        <p>Upload executable (py or jar), select resource you'll need, submit and simply wait for the results. If your code is in a web accessible place you can provide a link to it instead.
+                        <p>Upload executable (py or jar), select resource you'll need, submit and simply wait for the
+                            results. If your code is in a web accessible place you can provide a link to it instead.
                         </p>
                     </div>
                     <div class="col-lg-6 mx-auto">
@@ -84,8 +89,9 @@
                                 <input type="number" class="form-control" id="memory" value="8" min="1" max="16">
                             </div> -->
                             <div class="form-group">
-                                <label for="exe_path">Link to your executable</label>
+                                <label for="exe_path">Link to your executable *</label>
                                 <input type="text" class="form-control" id="exe_path">
+                                <p id="path_valid"></p>
                             </div>
                             <div class="form-group">
                                 <input type="submit" class="btn btn btn-primary" value="START">

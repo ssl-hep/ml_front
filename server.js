@@ -391,7 +391,7 @@ async function create_spark_pod(owner, name, path, executors) {
         // sparkPodManifest.spec.containers[0].args[2] = pass;
         // sparkPodManifest.spec.containers[0].args[3] = repo;
         // sparkPodManifest.spec.serviceAccountName = ml_front_config.NAMESPACE + '-fronter';
-
+        console.log(sparkPodManifest)
         await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods.post({ body: sparkPodManifest });
     } catch (err) {
         console.error("Error in creating spark pod:  " + err);

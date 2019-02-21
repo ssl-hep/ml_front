@@ -48,14 +48,14 @@
                 ]
             }
         ],
-        "volumes": [
-            {
-                "name": "local-scratch",
-                "hostPath": {
-                    "path": "/data"
-                }
-            }
-        ],
+        // "volumes": [
+        //     {
+        //         "name": "local-scratch",
+        //         "hostPath": {
+        //             "path": "/data"
+        //         }
+        //     }
+        // ],
         // "nodeSelector": {
         //     "mlnode": "true"
         // },

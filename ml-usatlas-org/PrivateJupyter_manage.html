@@ -63,18 +63,12 @@
 						<div class="display-t">
 							<div class="display-tc">
 								<div class="col-md-8">
-									<h1 class="no-margin">Your deployments</h1>
-									<p>From this page you can manage your private services. Please delete a service when
-										you don't need it
-										anymore. To check if a service status changed simply refresh this page.</p>
+									<h1 class="no-margin">Your Private JupyterLabs</h1>
+									<p>From this page you can manage your private JupyterLabs. Please delete a lab when
+										you don't need it anymore. To check if a service status changed simply refresh
+										this page.</p>
 									<a class='btn btn-primary' href="PrivateJupyter.html">
 										New Personal JupyterLab
-									</a>
-									<a class='btn btn-primary' id="plugin_SPARK" href="SparkJob.html">
-										New Spark Job
-									</a>
-									<a class='btn btn-primary' id="plugin_TFAAS" href="TFAAS.html">
-										Tensorflow as a service
 									</a>
 								</div>
 							</div>
@@ -88,11 +82,10 @@
 		<div class="gtco-services gtco-section">
 			<div class="col-md-12 col-md-offset-0 text-left">
 
-				<h2>Running Services</h2>
+				<h2>Running Labs</h2>
 				<table id="services_table" class="display" style="width:80%">
 					<thead>
 						<tr>
-							<th>Service</th>
 							<th>Name</th>
 							<th>Started at</th>
 							<th>Ending at</th>
@@ -109,11 +102,10 @@
 				</table>
 				<hr>
 
-				<h2>All Services</h2>
+				<h2>All Labs</h2>
 				<table id="services_table_es" class="display" style="width:80%">
 					<thead>
 						<tr>
-							<th>Service</th>
 							<th>Name</th>
 							<th>Started at</th>
 							<th>Ending at</th>
@@ -164,7 +156,6 @@
 					"paging": false,
 					"searching": false,
 					"aoColumns": [
-						{ "mData": 0, "sTitle": "Service", "sWidth": "15%" },
 						{ "mData": 1, "sTitle": "Name", "sWidth": "10%" },
 						{ "mData": 2, "sTitle": "Started at", "sWidth": "15%" },
 						{ "mData": 3, "sTitle": "Ending at", "sWidth": "15%" },
@@ -190,7 +181,6 @@
 					"paging": false,
 					"searching": false,
 					"aoColumns": [
-						{ "mData": 0, "sTitle": "Service", "sWidth": "15%" },
 						{ "mData": 1, "sTitle": "Name", "sWidth": "15%" },
 						{ "mData": 2, "sTitle": "Started at", "sWidth": "20%" },
 						{ "mData": 3, "sTitle": "Ending at", "sWidth": "20%" },

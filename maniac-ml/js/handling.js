@@ -22,6 +22,7 @@ $(document).ready(function () {
                     inp = inp.replace(" ", "-");
                     inp = inp.replace(".", "-");
                     inp = inp.replace(":", "-");
+                    inp = inp.replace("_", "-");
                     $("#name").val(inp);
                 }
                 if ($("#password").val() === "") {

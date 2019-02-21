@@ -52,13 +52,27 @@ app.get('/get_services_from_es', async function (req, res) {
 app.get('/plugins', function (req, res) {
     // console.log('sending plugins info back.');
     res.json({
+        PRIVATE_JUPYTER: ml_front_config.PRIVATE_JUPYTER,
         TFAAS: ml_front_config.TFAAS,
         PUBLIC_INSTANCE: ml_front_config.PUBLIC_INSTANCE,
-        MONITOR: ml_front_config.MONITOR
+        MONITOR: ml_front_config.MONITOR,
+        SPARK: ml_front_config.SPARK
     });
 });
 
-
+app.get('/login', (req, res) => {
+    console.log('Logging in');
+    // const user = new userm();
+    // user.id = req.session.sub_id = body.sub;
+    // user.username = req.session.username = body.preferred_username;
+    // user.affiliation = req.session.organization = body.organization;
+    // user.name = req.session.name = body.name;
+    // user.email = req.session.email = body.email;
+    // var found = await user.load();
+    req.session.authorized = true;
+    req.session.loggedIn = true;
+    res.redirect("index.html");
+});
 
 app.get('/user', function (req, res) {
     console.log('sending profile info back.');

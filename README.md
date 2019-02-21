@@ -18,7 +18,9 @@ A deployment creates node.js based web frontend. The front end authenticates use
  APPROVAL_EMAIL | Only if authorization is required | ivukotic@cern.ch 
  SINGLE_INSTANCE | Limit to only one private Jupyter instance| false 
  PUBLIC_INSTANCE | Expose a public JupyterLab instance that anyone can use | true 
- MONITOR | Enable user access to monitoring info | true 
+ MONITOR | Enable user access to monitoring info | true  
+ PRIVATE_JUPYTER | Enable Private JupyterLab creation | true 
+ SPARK | Enable Spark Job submission | false 
  TFAAS | Enable Tensorflow as a service | false 
  REMOTE_K8S | Enable non local k8s service spawn | false 
  REPORTING | Are pods monitored in Elasticsearc | true 
@@ -39,7 +41,15 @@ http://atlas-kibana.mwt2.org/goto/7ad9cbf9627d180d24e06ac018ac6c4a
 * add option to update some service parameters
 * add cloud deployments
 * add ml-front pods monitoring info collection
-* Move configuration from secret to config map
+* sanitize user pod names
+* SPARK submission
+    * submission page
+        * file upload (multiple files?)
+        * n executors
+        * executor memory
+        * job name
+    * pod to run spark-submit in
+    * results page. status, link to output.
 * write documentation
 * TFAAS
 * web site

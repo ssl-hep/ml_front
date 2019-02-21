@@ -431,9 +431,11 @@ app.get('/healthz', function (req, res) {
 app.get('/plugins', function (req, res) {
     // console.log('sending plugins info back.');
     res.json({
+        PRIVATE_JUPYTER: ml_front_config.PRIVATE_JUPYTER,
         TFAAS: ml_front_config.TFAAS,
         PUBLIC_INSTANCE: ml_front_config.PUBLIC_INSTANCE,
-        MONITOR: ml_front_config.MONITOR
+        MONITOR: ml_front_config.MONITOR,
+        SPARK: ml_front_config.SPARK
     });
 });
 

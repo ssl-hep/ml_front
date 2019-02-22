@@ -383,10 +383,10 @@ async function create_spark_pod(owner, name, path, executors) {
         sparkPodManifest.metadata.namespace = ml_front_config.NAMESPACE;
         sparkPodManifest.metadata.labels["instance"] = name;
         sparkPodManifest.metadata.labels["owner"] = owner;
-        sparkPodManifest.spec.containers[0].args[2] = "--conf spark.kubernetes.namespace=" + ml_front_config.NAMESPACE;
-        sparkPodManifest.spec.containers[0].args[5] = "--conf spark.executor.instances=" + executors;
-        sparkPodManifest.spec.containers[0].args[7] = "--name spark-" + name;
-        sparkPodManifest.spec.containers[0].args[8] = path;
+        sparkPodManifest.spec.containers[0].args[4] = "spark.kubernetes.namespace=" + ml_front_config.NAMESPACE;
+        sparkPodManifest.spec.containers[0].args[10] = "spark.executor.instances=" + executors;
+        sparkPodManifest.spec.containers[0].args[16] = "spark-" + name;
+        sparkPodManifest.spec.containers[0].args[17] = path;
         // sparkPodManifest.spec.containers[0].resources.requests["memory"] = memory + "Gi";
         // sparkPodManifest.spec.containers[0].resources.limits["memory"] = 2 * memory + "Gi";
         // sparkPodManifest.spec.containers[0].resources.requests["cpu"] = cpu;

@@ -12,7 +12,7 @@ metadata:
   name: spark-role
 rules:
 - apiGroups: [""] # "" indicates the core API group
-  resources: ["pods"]
+  resources: ["pods","services","configmaps"]
   verbs: ["get", "watch", "list", "create","delete"]
 ---
 kind: RoleBinding

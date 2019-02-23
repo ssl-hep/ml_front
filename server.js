@@ -490,7 +490,7 @@ app.get('/delete/:jservice', function (request, response) {
     response.redirect("/index.html");
 });
 
-app.get('/log/:podname', function (request, response) {
+app.get('/log/:podname', async function (request, response) {
     var podname = request.params.podname;
     ltext = await get_log(podname);
     console.log(ltext);

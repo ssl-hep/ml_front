@@ -472,6 +472,7 @@ app.get('/delete/:jservice', function (request, response) {
 
 
 app.get('/get_services_from_es/:servicetype', async function (req, res) {
+    console.log(req.params);
     var servicetype = req.params.servicetype;
     console.log('user:', req.session.sub_id, 'service:', servicetype);
     var user = await get_user(req.session.sub_id);

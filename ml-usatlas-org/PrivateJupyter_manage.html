@@ -174,7 +174,7 @@
 				});
 			});
 
-			$.getJSON('/get_services_from_es', function (data) {
+			$.getJSON('/get_services_from_es/privatejupyter', function (data) {
 				console.log(data);
 				var table = $('#services_table_es').DataTable({
 					data: data,

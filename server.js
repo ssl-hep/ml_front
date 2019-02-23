@@ -356,7 +356,7 @@ const fullHandler = async (req, res, next) => {
         res.link = await get_service_link(req.body.name);
         var user = await get_user(req.session.sub_id);
         var service_description = {
-            service: "Private JupyterLab",
+            service: "privatejupyter",
             name: req.body.name,
             ttl: req.body.time,
             gpus: req.body.gpus,
@@ -400,38 +400,6 @@ async function create_spark_pod(owner, name, path, executors) {
         return error;
     }
 
-    // if (ml_front_config.hasOwnProperty('JL_INGRESS')) {
-    //     try {
-    //         jupyterIngressManifest = require(ml_front_config.JL_INGRESS);
-    //         jupyterIngressManifest.metadata.name = name;
-    //         jupyterIngressManifest.metadata.labels["instance"] = name;
-    //         link = ml_front_config.SITENAME;
-    //         to_replace = link.split(".", 1);
-    //         jupyterIngressManifest.spec.rules[0].host = link.replace(to_replace, name);
-    //         jupyterIngressManifest.spec.rules[0].http.paths[0].backend.serviceName = name;
-    //         await client.apis.extensions.v1beta1.namespaces(ml_front_config.NAMESPACE).ingresses.post({ body: jupyterIngressManifest });
-    //     } catch (err) {
-    //         console.error("Error in creating jupyter ingress:  " + err);
-    //         error = new Error("Error in creating jupyter ingress:  " + err);
-    //         error.status = 500;
-    //         return error;
-    //     }
-    // }
-
-    // try {
-    //     jupyterServiceManifest = require(ml_front_config.JL_SERVICE);
-    //     jupyterServiceManifest.metadata.name = name;
-    //     jupyterServiceManifest.metadata.namespace = ml_front_config.NAMESPACE;
-    //     jupyterServiceManifest.metadata.labels["instance"] = name;
-    //     jupyterServiceManifest.spec.selector["instance"] = name;
-    //     await client.api.v1.namespaces(ml_front_config.NAMESPACE).services.post({ body: jupyterServiceManifest });
-    // } catch (err) {
-    //     console.error("Error in creating jupyter service:  " + err);
-    //     error = new Error("Error in creating jupyter service:  " + err);
-    //     error.status = 500;
-    //     return error;
-    // }
-
     console.log(`Spark pod ${name} successfully deployed.`);
 }
 
@@ -449,25 +417,26 @@ const sparkCreator = async (req, res, next) => {
         res.status(500).send('Some error in creating your spark pod.');
     }
 
-    // try {
-    //     res.link = await get_service_link(req.body.name);
-    //     var user = await get_user(req.session.sub_id);
-    //     var service_description = {
-    //         service: "Private JupyterLab",
-    //         name: req.body.name,
-    //         ttl: req.body.time,
-    //         gpus: req.body.gpus,
-    //         cpus: req.body.cpus,
-    //         memory: req.body.memory,
-    //         link: res.link,
-    //         repository: req.body.repository
-    //     };
-    //     await user.add_service(service_description);
-    //     next();
-    // } catch (err) {
-    //     console.log("Some error in getting service link.", err);
-    //     res.status(500).send('Some error in creating your JupyterLab.');
-    // }
+    try {
+        //TODO - get driver name so logs could be looked up.
+        // res.link = await get_service_link(req.body.name);
+        var user = await get_user(req.session.sub_id);
+        var service_description = {
+            service: "sparkjob",
+            name: req.body.name,
+            // gpus: req.body.gpus,
+            // cpus: req.body.cpus,
+            // memory: req.body.memory,
+            // link: res.link,
+            executors: req.body.executors,
+            repository: req.body.exe_path
+        };
+        await user.add_service(service_description);
+        next();
+    } catch (err) {
+        console.log("Some error in getting service link.", err);
+        res.status(500).send('Some error in creating your JupyterLab.');
+    }
 };
 
 const requiresLogin = async (req, res, next) => {
@@ -502,10 +471,11 @@ app.get('/delete/:jservice', function (request, response) {
 
 
 
-app.get('/get_services_from_es', async function (req, res) {
-    console.log('user:', req.session.sub_id, 'services...');
+app.get('/get_services_from_es/:servicetype', async function (req, res) {
+    var servicetype = request.params.servicetype;
+    console.log('user:', req.session.sub_id, 'service:', servicetype);
     var user = await get_user(req.session.sub_id);
-    var services = await user.get_services();
+    var services = await user.get_services(servicetype);
     console.log(services);
     res.status(200).send(services);
 });

@@ -203,13 +203,13 @@ module.exports = class User {
         console.log("Done.");
     };
 
-    async get_services() {
+    async get_services(servicetype) {
         console.log('getting all services of this user...');
         try {
             const resp = await this.es.search({
                 index: 'ml_front', type: 'docs',
                 body: {
-                    _source: ["service", "name", "link", "timestamp", "gpus", 'cpus', 'memory', "link", "ttl"],
+                    // _source: ["service", "name", "link", "timestamp", "gpus", 'cpus', 'memory', "link", "ttl"],
                     query: { match: { "owner": this.id } },
                     sort: { "timestamp": { order: "desc" } }
                 }
@@ -222,9 +222,15 @@ module.exports = class User {
                     var obj = resp.hits.hits[i]._source;
                     // console.log(obj);
                     var start_date = new Date(obj.timestamp).toUTCString();
-                    var end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
-                    var serv = [obj.service, obj.name, start_date, end_date, obj.gpus, obj.cpus, obj.memory]
-                    toSend.push(serv);
+                    if (servicetype == "privatejupyter") {
+                        var end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
+                        var serv = [obj.service, obj.name, start_date, end_date, obj.gpus, obj.cpus, obj.memory]
+                        toSend.push(serv);
+                    }
+                    if (servicetype == "sparkjob") {
+                        var serv = [obj.service, obj.name, start_date, obj.executors, obj.path]
+                        toSend.push(serv);
+                    }
                 }
             } else {
                 console.log("no services found.");

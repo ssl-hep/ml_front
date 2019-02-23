@@ -177,7 +177,7 @@ async function running_users_services(owner, servicetype) {
                     results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status]);
                 }
 
-                if (item.metadata.labels['k8s-app'] === "sparkjob" && item.status.phase !== "Succeeded") {
+                if (item.metadata.labels['k8s-app'] === "sparkjob") {
                     execs = item.spec.containers[0].args[10].replace("spark.executor.instances=", "")
                     path = item.spec.containers[0].args[17]
 

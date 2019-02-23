@@ -203,8 +203,19 @@ module.exports = class User {
         console.log("Done.");
     };
 
+    app.get('/get_users_services', async function(req, res) {
+        console.log('user:', req.session.sub_id, 'services.');
+        await users_services(req.session.sub_id)
+            .then(function (resp) {
+                console.log(resp);
+                res.status(200).send(resp);
+            }, function (err) {
+                console.trace(err.message);
+            });
+    });
+
     async get_services(servicetype) {
-        console.log('getting all services of this user...');
+        console.log('getting all services ' + servicetype + ' of this user...');
         try {
             // _source: ["service", "name", "link", "timestamp", "gpus", 'cpus', 'memory', "link", "ttl"],
             const resp = await this.es.search({
@@ -220,14 +231,14 @@ module.exports = class User {
                 // console.log(resp.hits.hits);
                 for (var i = 0; i < resp.hits.hits.length; i++) {
                     var obj = resp.hits.hits[i]._source;
-                    // console.log(obj);
+                    console.log(obj);
                     var start_date = new Date(obj.timestamp).toUTCString();
-                    if (servicetype == "privatejupyter") {
+                    if (servicetype === "privatejupyter") {
                         var end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
                         var serv = [obj.service, obj.name, start_date, end_date, obj.gpus, obj.cpus, obj.memory]
                         toSend.push(serv);
                     }
-                    if (servicetype == "sparkjob") {
+                    if (servicetype === "sparkjob") {
                         var serv = [obj.service, obj.name, start_date, obj.executors, obj.path]
                         toSend.push(serv);
                     }

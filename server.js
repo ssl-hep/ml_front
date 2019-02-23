@@ -161,7 +161,9 @@ async function running_users_services(owner, servicetype) {
             }
             if (item.metadata.labels.owner === owner) {
                 if (item.metadata.labels['k8s-app'] !== servicetype) continue;
+
                 crt = Date.parse(item.metadata.creationTimestamp); //number
+
                 if (item.metadata.labels['k8s-app'] === "privatejupyter") {
                     ttl = parseInt(item.metadata.labels.time2delete.replace('ttl-', ''));
                     endingat = new Date(crt + ttl * 86400000).toUTCString();
@@ -178,7 +180,8 @@ async function running_users_services(owner, servicetype) {
                 if (item.metadata.labels['k8s-app'] === "sparkjob") {
                     execs = item.spec.containers[0].args[10].replace("spark.executor.instances=", "")
                     path = item.spec.containers[0].args[17]
-                    results.push(['Spark Job', item.metadata.name, item.status.phase, execs, path])
+
+                    results.push(['Spark Job', item.metadata.name, new Date(crt).toUTCString(), item.status.phase, execs, path])
                 }
             }
         }

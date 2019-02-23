@@ -228,7 +228,7 @@ module.exports = class User {
                         toSend.push(serv);
                     }
                     if (servicetype === "sparkjob") {
-                        var serv = [obj.service, obj.name, start_date, obj.executors, obj.path]
+                        var serv = [obj.service, obj.name, start_date, obj.executors, obj.repository]
                         toSend.push(serv);
                     }
                 }

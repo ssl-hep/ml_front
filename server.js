@@ -177,7 +177,7 @@ async function running_users_services(owner, servicetype) {
                     results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status]);
                 }
 
-                if (item.metadata.labels['k8s-app'] === "sparkjob") {
+                if (item.metadata.labels['k8s-app'] === "sparkjob" && item.status.phase !== "Succeeded") {
                     execs = item.spec.containers[0].args[10].replace("spark.executor.instances=", "")
                     path = item.spec.containers[0].args[17]
 
@@ -247,6 +247,16 @@ async function get_service_link(name) {
         console.log(`can't get service ${name}.`);
     }
 
+}
+
+async function get_log(name) {
+    console.log(`Logs for pod ${name} in ml namespace`);
+    try {
+        const pod_log = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).log();
+        return pod_log;
+    } catch (err) {
+        console.log(`can't get pod ${name}.`);
+    }
 }
 
 // function follow_events() {
@@ -320,9 +330,10 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = "12", ti
     }
 
     console.log(`Jupyter and service ${name} successfully deployed.`);
-}
+};
 
-const parameterChecker = (req, res, next) => {
+const jupyterCreator = async (req, res, next) => {
+
     if (req.body === 'undefined' || req.body === null) {
         res.status(400).send('nothing POSTed.');
         return;
@@ -349,9 +360,7 @@ const parameterChecker = (req, res, next) => {
         res.sendStatus(400).send('not all parameters POSTed.');
         return;
     }
-};
 
-const fullHandler = async (req, res, next) => {
     await cleanup(req.body.name);
 
     try {
@@ -413,11 +422,11 @@ async function create_spark_pod(owner, name, path, executors) {
     }
 
     console.log(`Spark pod ${name} successfully deployed.`);
-}
+};
 
 const sparkCreator = async (req, res, next) => {
-    // TO DO - kill previous job if there.
-    // await cleanup(req.body.name);
+
+    await cleanup(req.body.name);
 
     try {
         await create_spark_pod(
@@ -481,6 +490,12 @@ app.get('/delete/:jservice', function (request, response) {
     response.redirect("/index.html");
 });
 
+app.get('/log/:podname', function (request, response) {
+    var podname = request.params.podname;
+    ltext = await get_log(podname);
+    console.log(ltext);
+    response.render("pug/podlog", { pod_name: podname, content: ltext });
+});
 
 app.get('/get_users_services/:servicetype', async function (req, res) {
     var servicetype = req.params.servicetype;
@@ -525,7 +540,7 @@ app.get('/plugins', function (req, res) {
     });
 });
 
-app.post('/jupyter', requiresLogin, parameterChecker, fullHandler, (req, res) => {
+app.post('/jupyter', requiresLogin, jupyterCreator, (req, res) => {
     console.log('Private Jupyter created!');
     res.status(200).send(res.link);
 });

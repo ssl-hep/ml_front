@@ -81,7 +81,7 @@
 		<div class="gtco-services gtco-section">
 			<div class="col-md-12 col-md-offset-0 text-left">
 
-				<h2>Running Jobs</h2>
+				<h2>Active Jobs</h2>
 				<table id="services_table" class="display" style="width:80%">
 					<thead>
 						<tr>
@@ -101,7 +101,7 @@
 				</table>
 				<hr>
 
-				<h2>All Jobs</h2>
+				<h2>Submitted Jobs</h2>
 				<table id="services_table_es" class="display" style="width:80%">
 					<thead>
 						<tr>
@@ -168,8 +168,7 @@
 						{
 							"mData": null,
 							"bSortable": false,
-							"mRender": function (o) { return '<a href=/delete/' + o[1] + '>Delete</a>' }
-							// "mRender": function (o) { return '<a href=/delete/' + o[1] + '>Delete</a>&nbsp;&nbsp;<a href=/edit/' + o[1] + '>Edit</a>' }
+							"mRender": function (o) { return '<a href=/delete/' + o[1] + '>Delete</a>&nbsp;&nbsp;<a href=/log/' + o[1] + '>View Log</a>' }
 						}
 					]
 				});

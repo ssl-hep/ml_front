@@ -160,12 +160,13 @@ async function running_users_services(owner, servicetype) {
                 continue;
             }
             if (item.metadata.labels.owner === owner) {
-                resources = item.spec.containers[0].resources;
-                console.log(resources);
+                if (item.metadata.labels['k8s-app'] !== servicetype) continue;
                 crt = Date.parse(item.metadata.creationTimestamp); //number
                 if (item.metadata.labels['k8s-app'] === "privatejupyter") {
                     ttl = parseInt(item.metadata.labels.time2delete.replace('ttl-', ''));
                     endingat = new Date(crt + ttl * 86400000).toUTCString();
+                    resources = item.spec.containers[0].resources;
+                    console.log(resources);
                     gpus = resources.requests['nvidia.com/gpu'];
                     cpus = resources.requests['cpu'];
                     ram = resources.requests['memory'];

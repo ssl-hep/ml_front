@@ -470,6 +470,16 @@ app.get('/delete/:jservice', function (request, response) {
 });
 
 
+app.get('/get_users_services', async function (req, res) {
+    console.log('user:', req.session.sub_id, 'services.');
+    await users_services(req.session.sub_id)
+        .then(function (resp) {
+            console.log(resp);
+            res.status(200).send(resp);
+        }, function (err) {
+            console.trace(err.message);
+        });
+});
 
 app.get('/get_services_from_es/:servicetype', async function (req, res) {
     console.log(req.params);

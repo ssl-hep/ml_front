@@ -204,9 +204,8 @@ module.exports = class User {
     };
 
     async get_services(servicetype) {
-        console.log('getting all services ' + servicetype + ' of this user...');
+        console.log('getting all services >', servicetype, '< of this user...');
         try {
-            // _source: ["service", "name", "link", "timestamp", "gpus", 'cpus', 'memory', "link", "ttl"],
             const resp = await this.es.search({
                 index: "ml_front", type: "docs",
                 body: {
@@ -220,6 +219,7 @@ module.exports = class User {
                 // console.log(resp.hits.hits);
                 for (var i = 0; i < resp.hits.hits.length; i++) {
                     var obj = resp.hits.hits[i]._source;
+                    if (obj.service !== servicetype) continue;
                     console.log(obj);
                     var start_date = new Date(obj.timestamp).toUTCString();
                     if (servicetype === "privatejupyter") {

@@ -176,7 +176,9 @@ async function running_users_services(owner, servicetype) {
                 }
 
                 if (item.metadata.labels['k8s-app'] === "sparkjob") {
-                    results.push(['Spark Job', item.metadata.name, item.status.phase])
+                    execs = item.spec.containers[0].args[10].replace("spark.executor.instances=", "")
+                    path = item.spec.containers[0].args[17]
+                    results.push(['Spark Job', item.metadata.name, item.status.phase, execs, path])
                 }
             }
         }

@@ -252,10 +252,11 @@ async function get_service_link(name) {
 async function get_log(name) {
     console.log(`Logs for pod ${name} in ml namespace`);
     try {
-        const pod_log = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).log();
+        pod_log = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).log();
+        console.log(pod_log);
         return pod_log;
     } catch (err) {
-        console.log(`can't get pod ${name}.`);
+        console.log(`can't get pod ${name} log.`);
     }
 }
 
@@ -494,7 +495,7 @@ app.get('/log/:podname', async function (request, response) {
     var podname = request.params.podname;
     ltext = await get_log(podname);
     console.log(ltext);
-    response.render("pug/podlog", { pod_name: podname, content: ltext });
+    response.render("podlog", { pod_name: podname, content: ltext });
 });
 
 app.get('/get_users_services/:servicetype', async function (req, res) {

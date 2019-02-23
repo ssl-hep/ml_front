@@ -206,10 +206,10 @@ module.exports = class User {
     async get_services(servicetype) {
         console.log('getting all services of this user...');
         try {
+            // _source: ["service", "name", "link", "timestamp", "gpus", 'cpus', 'memory', "link", "ttl"],
             const resp = await this.es.search({
-                index: 'ml_front', type: 'docs',
+                index: "ml_front", type: "docs",
                 body: {
-                    // _source: ["service", "name", "link", "timestamp", "gpus", 'cpus', 'memory', "link", "ttl"],
                     query: { match: { "owner": this.id } },
                     sort: { "timestamp": { order: "desc" } }
                 }

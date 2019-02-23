@@ -90,6 +90,7 @@
 							<th>Status</th>
 							<th>Executors</th>
 							<th>Executable</th>
+							<th>Edit</th>
 							<!--<th>GPUs</th>
 							<th>CPUs</th>
 							<th>Memory</th>-->
@@ -150,7 +151,7 @@
 		$(document).ready(function () {
 
 			$.getJSON('/get_users_services/sparkjob', function (data) {
-				console.log(data);
+				console.log('running jobs: ', data);
 				var table = $('#services_table').DataTable({
 					data: data,
 					"paging": false,
@@ -175,7 +176,7 @@
 			});
 
 			$.getJSON('/get_services_from_es/sparkjob', function (data) {
-				console.log(data);
+				console.log('from es:', data);
 				var table = $('#services_table_es').DataTable({
 					data: data,
 					"paging": false,

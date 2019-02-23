@@ -149,7 +149,7 @@ async function show_pods() {
     }
 }
 
-async function users_services(owner) {
+async function running_users_services(owner, servicetype) {
     console.log("all user's pods in ml namespace", owner);
     results = [];
     try {
@@ -163,14 +163,20 @@ async function users_services(owner) {
                 resources = item.spec.containers[0].resources;
                 console.log(resources);
                 crt = Date.parse(item.metadata.creationTimestamp); //number
-                ttl = parseInt(item.metadata.labels.time2delete.replace('ttl-', ''));
-                endingat = new Date(crt + ttl * 86400000).toUTCString();
-                gpus = resources.requests['nvidia.com/gpu'];
-                cpus = resources.requests['cpu'];
-                ram = resources.requests['memory'];
-                status = item.status.phase;
-                link = await get_service_link(item.metadata.name);
-                results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status]);
+                if (item.metadata.labels['k8s-app'] === "privatejupyter") {
+                    ttl = parseInt(item.metadata.labels.time2delete.replace('ttl-', ''));
+                    endingat = new Date(crt + ttl * 86400000).toUTCString();
+                    gpus = resources.requests['nvidia.com/gpu'];
+                    cpus = resources.requests['cpu'];
+                    ram = resources.requests['memory'];
+                    status = item.status.phase;
+                    link = await get_service_link(item.metadata.name);
+                    results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status]);
+                }
+
+                if (item.metadata.labels['k8s-app'] === "sparkjob") {
+                    results.push(['Spark Job', item.metadata.name, item.status.phase])
+                }
             }
         }
     } catch (err) {
@@ -185,7 +191,7 @@ async function enforce_time2delete() {
         if (item.metadata.labels === undefined) {
             continue;
         }
-        if (item.metadata.labels['k8s-app'] === 'ml-personal') {
+        if (item.metadata.labels['k8s-app'] === 'privatejupyter') {
             // console.log(item.metadata);
             ttd = parseInt(item.metadata.labels.time2delete.replace('ttl-', ''));
             crt = Date.parse(item.metadata.creationTimestamp);
@@ -470,9 +476,10 @@ app.get('/delete/:jservice', function (request, response) {
 });
 
 
-app.get('/get_users_services', async function (req, res) {
-    console.log('user:', req.session.sub_id, 'services.');
-    await users_services(req.session.sub_id)
+app.get('/get_users_services/:servicetype', async function (req, res) {
+    var servicetype = req.params.servicetype;
+    console.log('user:', req.session.sub_id, 'running services.', servicetype);
+    await running_users_services(req.session.sub_id, servicetype)
         .then(function (resp) {
             console.log(resp);
             res.status(200).send(resp);

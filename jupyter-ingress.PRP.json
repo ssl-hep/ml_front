@@ -8,7 +8,7 @@
             "kubernetes.io/ingress.class": "traefik"
         },
         "labels": {
-            "k8s-app": "ml-personal",
+            "k8s-app": "privatejupyter",
             "instance": "xxx"
         }
     },

@@ -149,7 +149,7 @@
 	<script type="text/javascript" language="JavaScript">
 		$(document).ready(function () {
 
-			$.getJSON('/get_users_services', function (data) {
+			$.getJSON('/get_users_services/privatejupyter', function (data) {
 				console.log(data);
 				var table = $('#services_table').DataTable({
 					data: data,

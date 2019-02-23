@@ -2,10 +2,10 @@
     "kind": "Pod",
     "apiVersion": "v1",
     "metadata": {
-        "name": "spark-personal",
+        "name": "sparkjob",
         "namespace": "ml-usatlas-org",
         "labels": {
-            "k8s-app": "spark-personal",
+            "k8s-app": "sparkjob",
             "instance": "xxx",
             "owner": "xxx"
         }
@@ -13,7 +13,7 @@
     "spec": {
         "containers": [
             {
-                "name": "spark-personal",
+                "name": "sparkjob",
                 "image": "slateci/spark:latest",
                 "args": [
                     "/opt/spark/bin/spark-submit",

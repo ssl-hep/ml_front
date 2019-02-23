@@ -5,7 +5,7 @@
         "name": "xxx",
         "namespace": "ml",
         "labels": {
-            "k8s-app": "ml-personal",
+            "k8s-app": "privatejupyter",
             "instance": "xxx"
         }
     },

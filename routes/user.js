@@ -1,6 +1,5 @@
 module.exports = function (app) {
 
-
     app.get('/user', function (req, res) {
         console.log('sending profile info back.');
 

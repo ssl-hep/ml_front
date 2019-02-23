@@ -1,30 +1,30 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: ml-personal  
+  name: privatejupyter  
   # namespace: ml
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: ml-personal.slateci.net
+    external-dns.alpha.kubernetes.io/hostname: privatejupyter.slateci.net
   labels:
-    k8s-app: ml-personal
+    k8s-app: privatejupyter
 spec:
   type: LoadBalancer
   ports:
   - port: 80
     targetPort: 9999
   selector:
-    k8s-app: ml-personal
+    k8s-app: privatejupyter
 ---
 kind: Pod
 apiVersion: v1
 metadata:
-  name: ml-personal
+  name: privatejupyter
   # namespace: ml
   labels:
-    k8s-app: ml-personal
+    k8s-app: privatejupyter
 spec:
   containers:
-  - name: ml-personal
+  - name: privatejupyter
     image: ivukotic/ml_platform_auto:latest
     args: ["/.run", "/ML_platform_tests/Assemble_tutorial_jlab.sh"] 
     ports:

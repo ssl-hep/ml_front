@@ -2,10 +2,10 @@
     "kind": "Service",
     "apiVersion": "v1",
     "metadata": {
-        "name": "ml-personal",
+        "name": "privatejupyter",
         "namespace": "xxx",
         "labels": {
-            "k8s-app": "ml-personal",
+            "k8s-app": "privatejupyter",
             "instance": "xxx",
             "servingat": "ml.usatlas.org"
         }

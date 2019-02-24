@@ -179,7 +179,7 @@ async function running_users_services(owner, servicetype) {
 
                 if (item.metadata.labels['k8s-app'] === "sparkjob") {
                     execs = item.spec.containers[0].args[10].replace("spark.executor.instances=", "")
-                    path = item.spec.containers[0].args[17]
+                    path = item.spec.containers[0].args[15]
 
                     results.push(['Spark Job', item.metadata.name, new Date(crt).toUTCString(), item.status.phase, execs, path])
                 }

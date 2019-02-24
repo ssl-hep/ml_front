@@ -30,7 +30,7 @@ $(document).ready(function () {
                     return;
                 }
 
-                data['name'] = $("#name").val();
+                data['name'] = inp;
                 data['password'] = $("#password").val();
                 data['time'] = $("#allocation").val();
                 data['gpus'] = $("#gpus").val();
@@ -88,7 +88,7 @@ $(document).ready(function () {
                     return;
                 }
 
-                data['name'] = $("#name").val();
+                data['name'] = inp;
                 data['exe_path'] = $("#exe_path").val();
                 data['executors'] = $("#execs").val();
                 // data['memory'] = $("#memory").val();

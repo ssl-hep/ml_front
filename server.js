@@ -252,8 +252,7 @@ async function get_service_link(name) {
 async function get_log(name) {
     console.log(`Logs for pod ${name} in ml namespace`);
     try {
-        pod = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).get();
-        pod_log = await pod.log();
+        pod_log = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).log();
         console.log(pod_log);
         return pod_log;
     } catch (err) {
@@ -408,8 +407,8 @@ async function create_spark_pod(owner, name, path, executors) {
         sparkPodManifest.metadata.labels["owner"] = owner;
         sparkPodManifest.spec.containers[0].args[4] = "spark.kubernetes.namespace=" + ml_front_config.NAMESPACE;
         sparkPodManifest.spec.containers[0].args[10] = "spark.executor.instances=" + executors;
-        sparkPodManifest.spec.containers[0].args[16] = "spark-" + name;
-        sparkPodManifest.spec.containers[0].args[17] = path;
+        sparkPodManifest.spec.containers[0].args[14] = "spark-" + name;
+        sparkPodManifest.spec.containers[0].args[15] = path;
         // sparkPodManifest.spec.containers[0].resources.requests["memory"] = memory + "Gi";
         // sparkPodManifest.spec.containers[0].resources.limits["memory"] = 2 * memory + "Gi";
         // sparkPodManifest.spec.containers[0].resources.requests["cpu"] = cpu;

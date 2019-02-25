@@ -252,7 +252,11 @@ async function get_service_link(name) {
 async function get_log(name) {
     console.log(`Logs for pod ${name} in ml namespace`);
     try {
-        pod_log = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).log.get();
+        pod_log = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).log.get({
+            qs: {
+                pretty: true
+            }
+        });
         console.log(pod_log);
         return pod_log;
     } catch (err) {

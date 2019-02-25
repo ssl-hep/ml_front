@@ -252,7 +252,7 @@ async function get_service_link(name) {
 async function get_log(name) {
     console.log(`Logs for pod ${name} in ml namespace`);
     try {
-        pod_log = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).log();
+        pod_log = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).log.get();
         console.log(pod_log);
         return pod_log;
     } catch (err) {
@@ -485,13 +485,13 @@ const requiresLogin = async (req, res, next) => {
 };
 
 
-app.get('/delete/:jservice', function (request, response) {
+app.get('/delete/:jservice', requiresLogin, function (request, response) {
     var jservice = request.params.jservice;
     cleanup(jservice);
     response.redirect("/index.html");
 });
 
-app.get('/log/:podname', async function (request, response) {
+app.get('/log/:podname', requiresLogin, async function (request, response) {
     var podname = request.params.podname;
     ltext = await get_log(podname);
     console.log(ltext);

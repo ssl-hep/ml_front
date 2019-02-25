@@ -493,9 +493,9 @@ app.get('/delete/:jservice', requiresLogin, function (request, response) {
 
 app.get('/log/:podname', requiresLogin, async function (request, response) {
     var podname = request.params.podname;
-    ltext = await get_log(podname);
-    console.log(ltext);
-    response.render("podlog", { pod_name: podname, content: ltext });
+    plog = await get_log(podname);
+    console.log(plog.body);
+    response.render("podlog", { pod_name: podname, content: plog.body });
 });
 
 app.get('/get_users_services/:servicetype', async function (req, res) {

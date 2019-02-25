@@ -254,7 +254,7 @@ async function get_log(name) {
     try {
         pod_log = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods(name).log.get();
         // console.log(pod_log);
-        return pod_log.replace(/(?:\r\n|\r|\n)/g, '<br>');
+        return pod_log.body;
     } catch (err) {
         console.log(`can't get pod ${name} log.`);
     }
@@ -494,8 +494,8 @@ app.get('/delete/:jservice', requiresLogin, function (request, response) {
 app.get('/log/:podname', requiresLogin, async function (request, response) {
     var podname = request.params.podname;
     plog = await get_log(podname);
-    console.log(plog.body);
-    response.render("podlog", { pod_name: podname, content: plog.body });
+    // console.log(plog.replace(/(?:\r\n|\r|\n)/g, '<br>'));
+    response.render("podlog", { pod_name: podname, content: plog.replace(/(?:\r\n|\r|\n)/g, '<br>') });
 });
 
 app.get('/get_users_services/:servicetype', async function (req, res) {

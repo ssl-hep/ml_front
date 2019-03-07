@@ -14,14 +14,5 @@ module.exports = function (app) {
         });
     });
 
-    app.get('/users_data', async function (req, res) {
-        console.log('Sending all users info...');
-        const user = new userm();
-        var data = await user.get_all_users();
-        res.status(200).send(data);
-        console.log('Done.');
-    });
-
-
 
 }

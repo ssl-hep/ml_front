@@ -656,6 +656,15 @@ app.get('/authorize/:user_id', async function (req, res) {
     res.redirect("/users.html");
 });
 
+app.get('/users_data', async function (req, res) {
+    console.log('Sending all users info...');
+    const user = new userm();
+    var data = await user.get_all_users();
+    res.status(200).send(data);
+    console.log('Done.');
+});
+
+
 app.use((err, req, res, next) => {
     console.error('Error in error handler: ', err.message);
     res.status(err.status).send(err.message);

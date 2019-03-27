@@ -38,8 +38,11 @@ http://atlas-kibana.mwt2.org/goto/7ad9cbf9627d180d24e06ac018ac6c4a
 
 
 ## TODO
+* add shared filesystem
+* add option to mount CVMFS
 * add option to update some service parameters
 * add cloud deployments
+* add postfixes to pods/services
 * add ml-front pods monitoring info collection
 * sanitize user pod names
 * SPARK submission

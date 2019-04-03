@@ -9,7 +9,7 @@ var request = require('request');
 
 console.log('ML_front server starting ... ');
 
-TEST = true
+TEST = false
 
 var ml_front_config;
 var privateKey;

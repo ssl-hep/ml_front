@@ -1,12 +1,16 @@
 
 var elasticsearch = require('elasticsearch');
 
-var config = require('/etc/ml-front-conf/mlfront-config.json');
-var mg_config = require('/etc/mg-conf/config.json');
+TEST = false
 
-// for testing only.
-// var config = require('./kube/ml-usatlas-org/secrets/config.json');
-// var mg_config = require('./kube/ml-usatlas-org/secrets/mg-config.json');
+if (!TEST) {
+    var config = require('/etc/ml-front-conf/mlfront-config.json');
+    var mg_config = require('/etc/mg-conf/config.json');
+}
+else {
+    var config = require('./kube/test-ml/secrets/config.json');
+    var mg_config = require('./kube/test-ml/secrets/mg-config.json');
+}
 
 module.exports = class User {
 

@@ -1,0 +1,50 @@
+extends ./index.pug
+
+block content
+    section#gtco-header.bg-light
+        .container
+            .row
+                .col-lg-5.mx-auto
+                    h2 Private JupyterLab
+                    p.lead
+                    | When you don&apos;t want your code visible to others, or need dedicated resources.
+                    p
+                    | Select resource you&apos;ll need, how long you will need them and a dedicated JupyterLab will
+                    | spawn. In
+                    | a minute or so you will recieve a link to access it. We suggest to keep your code in a
+                    | github
+                    | repository, clone it upon JupyterLab start and push back before your JupyterLab expires.
+
+                .col-lg-6.mx-auto
+                    h2 Configure your Instance
+                    p.lead
+                    | Please only select what you actually need.
+                    form#private-jupyter-start(autocomplete='off')
+                        .form-group
+                            label(for='name') Name *
+                            input#name.form-control(type='text')
+                            p#name_valid
+                        .form-group
+                            label(for='password') Password *
+                            input#password.form-control(type='password')
+                            p#pass_valid
+                        .form-group
+                            label(for='allocation') Time to live [days] * 
+                            input#allocation.form-control(type='number' value='1' min='1' max='30')
+                        .form-group
+                            label(for='gpus') GPUs
+                            input#gpus.form-control(type='number' value='0' min='0' max='5')
+                        .form-group
+                            label(for='cpus') CPUs
+                            input#cpus.form-control(type='number' value='1' min='1' max='4')
+                        .form-group
+                            label(for='memory') Memory [GB]
+                            input#memory.form-control(type='number' value='8' min='1' max='16')
+                        .form-group
+                            label(for='customgit') Check out your github repo
+                            input#customgit.form-control(type='text')
+                        .form-group
+                            button#private_jupyter_create_button.btn.btn-primary START
+
+
+                    

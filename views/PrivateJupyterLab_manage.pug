@@ -1,0 +1,52 @@
+extends ./index.pug
+
+block content
+    section#gtco-header.gtco-cover.gtco-cover-xs.gtco-inner(role='banner')
+        .gtco-container
+            .row
+                .col-md-12.col-md-offset-0.text-left
+                    .display-t
+                        .display-tc
+                            .col-md-8
+                                h1.no-margin Your Private JupyterLabs
+                                p
+                                    | From this page you can manage your private JupyterLabs. Please delete a lab when
+                                    | you don&apos;t need it anymore. To check if a service status changed simply refresh
+                                    | this page.
+                                a.btn.btn-primary(href='/private_jupyter_lab_create')
+                                    | New Personal JupyterLab
+    
+    .gtco-services.gtco-section
+        .col-md-12.col-md-offset-0.text-left
+            h2 Running Labs
+            table.services_table.display(style='width:80%')
+                thead
+                    tr
+                    th Name
+                    th Started at
+                    th Ending at
+                    th GPUs
+                    th CPUs
+                    th Memory
+                    th Link
+                    th Status
+                    th Command
+                tbody
+
+            hr
+
+            h2 All Labs
+            table.services_table_es.display(style='width:80%')
+                thead
+                    tr
+                    th Name
+                    th Started at
+                    th Ending at
+                    th GPUs
+                    th CPUs
+                    th Memory
+                tbody
+
+block extra_scripts
+    script(src='/js/private_lab.js')
+        

@@ -1,0 +1,44 @@
+extends ./index.pug
+
+block content
+    section#gtco-header.gtco-cover.gtco-cover-xs.gtco-inner(role='banner')
+        .gtco-container
+            .row
+                .col-md-12.col-md-offset-0.text-left
+                    .display-t
+                        .display-tc
+                            .col-md-8
+                                h1.no-margin Your Spark Jobs
+                                p
+                                    | From this page you can manage your Spark jobs. To check if a job status changed simply refresh this page.
+                                a.btn.btn-primary(href='/spark_job_create')
+                                    | New Spark Job
+    
+    .gtco-services.gtco-section
+        .col-md-12.col-md-offset-0.text-left
+            h2 Active Jobs
+            table#services_table.display(style='width:80%')
+                thead
+                    tr
+                    th Name
+                    th Started at
+                    th Status
+                    th Executors
+                    th Executable
+                    th Edit
+                tbody
+
+            hr
+
+            h2 Submitted Jobs
+            table#services_table_es.display(style='width:80%')
+                thead
+                    th Name
+                    th Started at
+                    th Executors
+                    th Executable
+                tbody
+
+block extra_scripts
+    script(src='/js/spark_jobs.js')
+        

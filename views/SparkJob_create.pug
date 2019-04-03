@@ -1,0 +1,35 @@
+extends ./index.pug
+
+block content
+    section#gtco-header.bg-light
+        .container
+            .row
+                .col-lg-5.mx-auto
+                    h2 Spark Job
+                    p.lead
+                    | Execute Spark jobs quickly and painlessly.
+                    p
+                    | Upload executable (py or jar), select resource you'll need, submit and simply wait for 
+                    | the results. If your code is in a web accessible place you can provide a link to it instead.
+
+                .col-lg-6.mx-auto
+                    h2 Configure your Job
+                    p.lead
+                    | Please only select what you actually need.
+                    form#private-jupyter-start(autocomplete='off')
+                        .form-group
+                            label(for='name') Name *
+                            input#name.form-control(type='text')
+                            p#name_valid
+                        .form-group
+                            label(for='Executors') Executors *
+                            input#executors.form-control(type='number' value='1' min='1' max='30')
+                        .form-group
+                            label(for='url') Name *
+                            input#url.form-control(type='text')
+                            p#url_valid
+                        .form-group
+                            button#sparkjob_create_button.btn.btn-primary START
+
+
+                    

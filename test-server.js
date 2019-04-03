@@ -350,64 +350,6 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = "12", ti
 
 const jupyterCreator = async (req, res, next) => {
 
-    if (req.body === 'undefined' || req.body === null) {
-        res.status(400).send('nothing POSTed.');
-        return;
-    }
-
-    console.log('body:', req.body);
-
-    if (
-        typeof req.body.name !== 'undefined' && req.body.name &&
-        typeof req.body.password !== 'undefined' && req.body.password &&
-        typeof req.body.gpus !== 'undefined' && req.body.gpus &&
-        typeof req.body.time !== 'undefined' && req.body.time
-    ) {
-        console.log('Creating a private JupyterLab.');
-        try {
-            req.body.time = parseInt(req.body.time);
-            req.body.gpus = parseInt(req.body.gpus);
-        } catch (error) {
-            res.sendStatus(400).send('unparseable parameters.');
-            return;
-        }
-        next();
-    } else {
-        res.sendStatus(400).send('not all parameters POSTed.');
-        return;
-    }
-
-    await cleanup(req.body.name);
-
-    try {
-        await create_jupyter(
-            req.session.sub_id,
-            req.body.name, req.body.password,
-            req.body.gpus, req.body.cpus, req.body.memory, req.body.time, req.body.repository);
-    } catch (err) {
-        console.log("Some error in creating jupyter.", err);
-        res.status(500).send('Some error in creating your JupyterLab.');
-    }
-
-    try {
-        res.link = await get_service_link(req.body.name);
-        var user = await get_user(req.session.sub_id);
-        var service_description = {
-            service: "privatejupyter",
-            name: req.body.name,
-            ttl: req.body.time,
-            gpus: req.body.gpus,
-            cpus: req.body.cpus,
-            memory: req.body.memory,
-            link: res.link,
-            repository: req.body.repository
-        };
-        await user.add_service(service_description);
-        next();
-    } catch (err) {
-        console.log("Some error in getting service link.", err);
-        res.status(500).send('Some error in creating your JupyterLab.');
-    }
 };
 
 async function create_spark_pod(owner, name, path, executors) {
@@ -556,9 +498,70 @@ app.get('/plugins', function (req, res) {
     });
 });
 
-app.post('/jupyter', requiresLogin, jupyterCreator, (req, res) => {
-    console.log('Private Jupyter created!');
-    res.status(200).send(res.link);
+app.post('/jupyter', async function (req, res) {
+    console.log('Private Jupyter creation!');
+    if (!req.session.loggedIn) {
+        res.sendStatus(401).send('To use this feature you must be logged in and authorized.');
+    }
+
+    if (req.body === 'undefined' || req.body === null) {
+        res.status(400).send('nothing POSTed.');
+        return;
+    }
+
+    console.log('body:', req.body);
+
+    if (
+        typeof req.body.name !== 'undefined' && req.body.name &&
+        typeof req.body.password !== 'undefined' && req.body.password &&
+        typeof req.body.gpus !== 'undefined' && req.body.gpus &&
+        typeof req.body.time !== 'undefined' && req.body.time
+    ) {
+        console.log('Creating a private JupyterLab.');
+        try {
+            req.body.time = parseInt(req.body.time);
+            req.body.gpus = parseInt(req.body.gpus);
+        } catch (error) {
+            res.sendStatus(400).send('unparseable parameters.');
+            return;
+        }
+    } else {
+        res.sendStatus(400).send('not all parameters POSTed.');
+        return;
+    }
+
+    await cleanup(req.body.name);
+
+    try {
+        await create_jupyter(
+            req.session.sub_id,
+            req.body.name, req.body.password,
+            req.body.gpus, req.body.cpus, req.body.memory, req.body.time, req.body.repository);
+    } catch (err) {
+        console.log("Some error in creating jupyter.", err);
+        res.status(500).send('Some error in creating your JupyterLab.');
+    }
+
+    try {
+        res.link = await get_service_link(req.body.name);
+        var user = await get_user(req.session.sub_id);
+        var service_description = {
+            service: "privatejupyter",
+            name: req.body.name,
+            ttl: req.body.time,
+            gpus: req.body.gpus,
+            cpus: req.body.cpus,
+            memory: req.body.memory,
+            link: res.link,
+            repository: req.body.repository
+        };
+        await user.add_service(service_description);
+        res.status(200).send(res.link);
+    } catch (err) {
+        console.log("Some error in getting service link.", err);
+        res.status(500).send('Some error in creating your JupyterLab.');
+    }
+
 });
 
 app.post('/spark', requiresLogin, sparkCreator, (req, res) => {
@@ -568,9 +571,21 @@ app.post('/spark', requiresLogin, sparkCreator, (req, res) => {
 
 app.get('/login', (req, res) => {
     console.log('Logging in');
-    red = `${globConf.AUTHORIZE_URI}?scope=urn%3Aglobus%3Aauth%3Ascope%3Aauth.globus.org%3Aview_identities+openid+email+profile&state=garbageString&redirect_uri=${globConf.redirect_link}&response_type=code&client_id=${globConf.CLIENT_ID}`;
-    // console.log('redirecting to:', red);
-    res.redirect(red);
+    if (TEST) {
+        const user = new userm();
+        user.id = req.session.sub_id = 'ivukotic_id_test';
+        user.username = req.session.username = 'test_username';
+        user.affiliation = req.session.organization = 'test_organization';
+        user.name = req.session.name = 'test_Ilija_Vukotic';
+        user.email = req.session.email = 'test_email';
+        req.session.loggedIn = true;
+        res.render('index', req.session);
+    }
+    else {
+        red = `${globConf.AUTHORIZE_URI}?scope=urn%3Aglobus%3Aauth%3Ascope%3Aauth.globus.org%3Aview_identities+openid+email+profile&state=garbageString&redirect_uri=${globConf.redirect_link}&response_type=code&client_id=${globConf.CLIENT_ID}`;
+        // console.log('redirecting to:', red);
+        res.redirect(red);
+    }
 });
 
 app.get('/logout', function (req, res, next) {
@@ -679,17 +694,6 @@ app.get('/users_data', async function (req, res) {
     console.log('Done.');
 });
 
-app.get('/test', async function (req, res) {
-    const user = new userm();
-    user.id = req.session.sub_id = 'ivukotic_id_test';
-    user.username = req.session.username = 'test_username';
-    user.affiliation = req.session.organization = 'test_organization';
-    user.name = req.session.name = 'test_Ilija_Vukotic';
-    user.email = req.session.email = 'test_email';
-    req.session.loggedIn = true;
-    res.render('index', req.session);
-});
-
 app.get('/private_jupyter_lab_manage', async function (req, res) {
     console.log('Private Jupyter Lab called!');
     res.render('PrivateJupyterLab_manage', req.session);
@@ -698,6 +702,16 @@ app.get('/private_jupyter_lab_manage', async function (req, res) {
 app.get('/private_jupyter_lab_create', async function (req, res) {
     console.log('Private Jupyter Lab create called!');
     res.render('PrivateJupyterLab_create', req.session);
+});
+
+app.get('/spark_job_manage', async function (req, res) {
+    console.log('Spark Job manage called!');
+    res.render('SparkJob_manage', req.session);
+});
+
+app.get('/spark_job_create', async function (req, res) {
+    console.log('Spark job create called!');
+    res.render('SparkJob_create', req.session);
 });
 
 app.get('/profile', async function (req, res) {

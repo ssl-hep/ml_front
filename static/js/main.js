@@ -115,7 +115,7 @@
 			$("#pass_valid").text("Password is mandatory!").show();
 			return;
 		}
-		
+
 		data['name'] = inp;
 		data['password'] = $("#password").val();
 		data['time'] = $("#allocation").val();
@@ -131,17 +131,18 @@
 			contentType: 'application/json',
 			data: JSON.stringify(data),
 			success: function (link) {
-				// alert('It can take several minutes after service status changes to "running" for the service to become available.');
-				window.location.href = "/PrivateJupyterLab_manage";
+				alert('It can take several minutes after service status changes to "running" for the service to become available.');
+				window.location.href = "/private_jupyter_lab_manage";
 			},
 			error: function (xhr, textStatus, errorThrown) {
 				alert('Error code:' + xhr.status + '.  ' + xhr.responseText);
-				window.location.href = "/PrivateJupyter_manage";
+				window.location.href = "/private_jupyter_lab_manage";
 			}
 		});
 
 	});
 
+	
 	$("#private-spark-start").submit(
 		function (event) {
 

@@ -1,0 +1,36 @@
+extends ../../views/about.pug
+
+block about-header
+    .row
+        .col-lg-12.mx-auto
+            h2 About
+            p.lead
+                | The CODAS computational platform is the result of a collaborative effort between the 
+                | University of Chicago and the Unversity of California, San Diego. 
+                | It leverages software and infrastructure from the ATLAS Midwest Tier2 Center, 
+                | the Pacific Research Platform, the CHASE-CI project,the SLATE project, 
+                | Virtual Clusters for Community Computation (VC3) and the Open Science Grid.
+block extra-person
+
+    .col-lg-2.mx-auto
+        .card(style='width: 12rem;')
+            img.card-img-top(src='john_graham.jpg', alt='Card image')
+            .card-body
+                h4.card-title John Graham
+                p.card-text Senior Development Engineer, Calit2/QI UC San Diego
+                a(href='mailto:jjgraham@eng.ucsd.edu', target='_blank') 
+                    i.fas.fa-envelope-open-text.fa-1x
+
+    .col-lg-2.mx-auto
+        .card(style='width: 12rem;')
+            img.card-img-top(src='dimitri.jpeg', alt='Card image')
+            .card-body
+                h4.card-title Dimitri Mishin
+                p.card-text Senior Integration Engineer, SDSC
+                a(href='mailto:mailto:dmishin@ucsd.edu', target='_blank') 
+                    i.fas.fa-envelope-open-text.fa-1x
+                a(href='https://www.linkedin.com/in/dmitry-mishin-59980911/', target='_blank') 
+                    i.fa.fa-linkedin.fa-1x
+
+block footer
+    include ./footer.pug

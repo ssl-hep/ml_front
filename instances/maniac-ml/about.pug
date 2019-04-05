@@ -1,0 +1,28 @@
+extends ../../views/about.pug
+
+block about-header
+    .row
+        .col-lg-12.mx-auto
+            h2 About
+            p.lead
+            | The UCHICAGO computational platform is the result of a collaborative effort between the 
+            | University of Chicago and the Unversity of California, San Diego. 
+            | It leverages software and infrastructure from the ATLAS Midwest Tier2 Center, the
+            | Pacific Research Platform, the CHASE-CI project,the SLATE project, Virtual Clusters for Community Computation (VC3) and
+            | the Open Science Grid.
+block extra-person
+    .col-lg-2.mx-auto
+        .card(style='width: 12rem;')
+            img.card-img-top(src='DavidM.jpg', alt='Card image')
+            .card-body
+                h4.card-title David W. Miller
+                p.card-text Physicist and Computational Scientist, UChicago
+                a(href='mailto:David.W.Miller@uchicago.edu', target='_blank') 
+                    i.fas.fa-envelope-open-text.fa-1x
+                a(href='https://www.facebook.com/fizisist', target='_blank') 
+                    i.fa.fa-facebook.fa-1x
+                a(href='https://goo.gl/maps/zsRWJS99Lht', target='_blank')
+                    i.fas.fa-map-marker.fa-1x(aria-hidden='true')
+
+block footer
+    include ./footer.pug

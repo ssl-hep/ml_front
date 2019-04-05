@@ -1,0 +1,55 @@
+extends ../../views/index.pug
+
+block content
+    header#home.bg-default.text-white
+        .container
+            .row
+                .col-lg-5.mx-auto
+                    h1 CODAS PLATFORM
+                    p.lead Supporting Computational and Data Science for High Energy Physics
+                .col-lg-4.mx-auto
+                    img(src='images/SSL-logo-v5-line.png' style='width:50%;')
+
+    section#ml-elements.bg-light
+        .container
+            .row
+                .col-lg-5.mx-auto
+                    h2 Purpose
+                    p.lead
+                        | A computational platform optimized for machine learning applications, 
+                        | supporting the second school on tools, techniques and methods for 
+                        | Computational and Data Science for High Energy Physics (CoDaS-HEP), 
+                        | 23-27 July, 2018, at Princeton University.
+                    h2 Elements
+                    p.lead
+                        | The platform provides hosted JupyterLab instances for students as well as 
+                        | access to GPU resources of the Pacific Research Platform (PRP) and CHASE-CI. 
+                        | Elements of the SLATE Kubernetes platform and effort from the VC3 project were 
+                        | used in the development.
+                    ul.list-group.list-group-flush
+                        li.list-group-item 
+                            a(href="https://github.com/ssl-hep/mlfront") GitHub (this portal)
+                        li.list-group-item 
+                            a(href="http://slateci.io/") SLATE: Services Layer at the Edge
+                        li.list-group-item 
+                            a(href="http://pacificresearchplatform.org/") Pacific Research Platform
+                        li.list-group-item 
+                            a(href="https://nsf.gov/awardsearch/showAward?AWD_ID=1730158") CHASE-CI
+                        li.list-group-item 
+                            a(href="https://virtualclusters.org") VC3
+                            
+                .col-lg-4.mx-auto
+                    .card(style='width: 18rem;')
+                        .card-header
+                            i.fa.fa-external-link-square(aria-hidden='true')
+                            |  Links
+                        ul.list-group.list-group-flush
+                            li.list-group-item
+                                a(href='href=http://codas-hep.org/') CODAS-HEP.org
+                            li.list-group-item
+                                a(href="https://indico.cern.ch/event/707498/timetable/") 2018 School Program
+                            li.list-group-item
+                                a(href=href="https://hepsoftwarefoundation.org/") HEP Software Foundation
+
+block footer
+    include ./footer.pug

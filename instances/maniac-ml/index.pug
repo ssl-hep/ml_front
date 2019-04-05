@@ -1,0 +1,53 @@
+extends ../../views/index.pug
+
+block content
+    header#home.bg-default.text-white
+        .container
+            .row
+                .col-lg-5.mx-auto
+                    h1 PHYS 250 Fall 2018 Computing Platform
+                    p.lead JupyterLab-based infrastructure for Computational Physics
+                .col-lg-4.mx-auto
+                    img(src='images/SSL-logo-v5-line.png' style='width:50%;')
+
+    section#ml-elements.bg-light
+        .container
+            .row
+                .col-lg-5.mx-auto
+                    h2 Purpose
+                    p.lead
+                        | A computational platform that supports on-demand JupyterLab instances for interactive python development as well as
+                        | advanced computational resources such as those required for high-level, compute-intensive machine learning
+                        | applications.
+                    h2 Elements
+                    p.lead
+                        | The platform provides hosted JupyterLab instances for the students in PHYS 250 (Autumn 2018) on GPU resources hosted
+                        | by the computing center for the ATLAS Experiment (called the Midwest Tier 2). 
+                        | Elements of the SLATE Kubernetes platform and effort from the VC3 project were used
+                        | in the development of this platform
+                    ul.list-group.list-group-flush
+                        li.list-group-item 
+                            a(href='https://canvas.uchicago.edu/courses/16987') Canvas site for PHYS 250 (Autumn 2018)
+                        li.list-group-item 
+                            a(href='https://piazza.com/uchicago/fall2018/phys250') Piazza site for PHYS 250 (Autumn 2018)
+                        li.list-group-item 
+                            a(href='https://github.com/UChicagoPhysics/PHYS250') PHYS 250 GitHub software repository
+                        li.list-group-item 
+                            a(href='https://github.com/UChicagoPhysics/SampleExercises') UChicago computational physics library
+                .col-lg-4.mx-auto
+                    .card(style='width: 18rem;')
+                        .card-header
+                            i.fa.fa-external-link-square(aria-hidden='true')
+                            |  External resources
+                        ul.list-group.list-group-flush
+                            li.list-group-item
+                                a(href='https://csil.cs.uchicago.edu/minicourses/linux.html') Intro to Linux (UChicago CSIL)
+                            li.list-group-item
+                                a(href='https://csil.cs.uchicago.edu/minicourses/Git.html') Intro to Git (UChicago CSIL)
+                            li.list-group-item
+                                a(href='https://www.compadre.org/PICUP/') PICUP (Partnership for Integration of Computation into Undergraduate Physics)
+                            li.list-group-item
+                                a(href='http://physics.oregonstate.edu/~landaur/Books/CPbook/index.html') Computational Physics text from Landau, Paez, Bordeianu
+
+block footer
+    include ./footer.pug

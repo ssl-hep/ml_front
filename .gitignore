@@ -5,6 +5,7 @@ certificates
 mg-config.json
 *globus*.json
 test
+ToDelete
 
 # Logs
 logs

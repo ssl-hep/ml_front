@@ -18,14 +18,16 @@ nav#mainNav.navbar.navbar-expand-lg.fixed-top(style='background-image: linear-gr
           .dropdown-menu(aria-labelledby='navbarDropdown')
             if (loggedIn)
               a.dropdown-item(href='/private_jupyter_lab_manage') Private JupyterLab
-              if (plugins.includes('SPARK'))
-                a.dropdown-item(href='/spark_job_manage') Spark Jobs
-              if (plugins.includes('PUBLIC_INSTANCE'))
-                a.dropdown-item(href='http://ml.usatlas.org:30080/lab?') Public JupyterLab
+              if (plugins)
+                if (plugins.includes('SPARK'))
+                  a.dropdown-item(href='/spark_job_manage') Spark Jobs
+                if (plugins.includes('PUBLIC_INSTANCE'))
+                  a.dropdown-item(href='http://ml.usatlas.org:30080/lab?') Public JupyterLab
             if (loggedIn)
               a.dropdown-item( href='/users') Users
-            if (plugins.includes('MONITOR'))
-              a.dropdown-item(href='https://grafana.mwt2.org/dashboard/db/ml-gpu-utilization?orgId=1&from=now-6h&to=now' target='_blank') Monitor
+            if (plugins)
+              if (plugins.includes('MONITOR'))
+                a.dropdown-item(href='https://grafana.mwt2.org/dashboard/db/ml-gpu-utilization?orgId=1&from=now-6h&to=now' target='_blank') Monitor
 
 
         if (!loggedIn)

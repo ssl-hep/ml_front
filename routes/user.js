@@ -342,7 +342,7 @@ module.exports = function (app, config) {
 
     app.get('/authorize/:user_id', async function (req, res) {
         console.log('Authorizing user...');
-        var user = new module.User(req.session.user_id);
+        var user = new module.User(req.params.user_id);
         await user.load();
         user.approve();
         res.render("users", req.session);

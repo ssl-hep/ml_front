@@ -2,10 +2,10 @@
   "name": "ml_front",
   "version": "1.0.0",
   "description": "a frontend for k8s ML resources.",
-  "main": "ml_front.js",
+  "main": "server.js",
   "scripts": {
     "prestart": "npm install",
-    "start": "node ml_front.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",

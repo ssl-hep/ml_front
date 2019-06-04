@@ -1,6 +1,7 @@
 .kube
 *.cer
 *.pem
+secrets
 certificates
 mg-config.json
 *globus*.json

@@ -18,7 +18,7 @@ module.exports = function (app, config) {
     module.User = class User {
 
         constructor(id = null) {
-            this.es = new elasticsearch.Client({ host: 'atlas-kibana.mwt2.org:9200', log: 'error' });
+            this.es = new elasticsearch.Client({ host: config.ES_HOST, log: 'error' });
             this.mg = require('mailgun-js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
             this.approved_on = 0;
             this.approved = false;

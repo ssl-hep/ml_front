@@ -8,7 +8,10 @@ kubectl create -f service_account.yaml
 kubectl delete secret -n ml-usatlas-org cert-secret
 kubectl create secret -n ml-usatlas-org generic cert-secret --from-file=key=secrets/certificates/ml-front.key.pem --from-file=cert=secrets/certificates/ml-front.cert.cer
 kubectl create secret -n ml-usatlas-org generic globus-secret --from-file=gconf=secrets/globus-config.json
+
+kubectl delete secret -n ml-usatlas-org config
 kubectl create secret -n ml-usatlas-org generic config --from-file=mlconf=secrets/config.json
+
 kubectl create secret -n ml-usatlas-org generic mg-config --from-file=mgconf=secrets/mg-config.json
 
 kubectl create -f frontend.yaml

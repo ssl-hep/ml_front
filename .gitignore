@@ -3,6 +3,7 @@
 *.pem
 secrets
 certificates
+config.json
 mg-config.json
 *globus*.json
 test

@@ -3,43 +3,23 @@ apiVersion: v1
 metadata:
   name: codas
   namespace: codas
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: codas.slateci.net
   labels:
     k8s-app: codas
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
-  # - name: https
-  #   protocol: TCP
-  #   port: 443
-  #   targetPort: 443
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 443
   - name: http
     protocol: TCP
     port: 80
     targetPort: 80
   selector:
     k8s-app: codas
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: codas
-  labels:
-    k8s-app: codas
-  annotations:
-    kubernetes.io/ingress.class: slate
-spec:
-  tls:
-  - hosts:
-    - codas.slateci.net
-    secretName: codas-tls
-  rules:
-  - host: codas.slateci.net
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: codas
-          servicePort: 80
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -62,20 +42,20 @@ spec:
       - name: codas
         image: sslhep/ml_front:latest
         ports:
-          # - containerPort: 443
+          - containerPort: 443
           - containerPort: 80
         livenessProbe:
           httpGet:
-            scheme: HTTP
+            scheme: HTTPS
             path: /healthz
-            port: 80
+            port: 443
           periodSeconds: 60
           initialDelaySeconds: 60
           timeoutSeconds: 10
         volumeMounts:
-        # - name: https-certs-volume
-        #   mountPath: "/etc/https-certs/"
-        #   readOnly: true
+        - name: https-certs-volume
+          mountPath: "/etc/https-certs/"
+          readOnly: true
         - name: globus-conf-volume
           mountPath: "/etc/globus-conf/"
         - name: mg-conf-volume
@@ -83,15 +63,15 @@ spec:
         - name: frontend-conf-volume
           mountPath: "/etc/ml-front-conf/"
       volumes:
-      # - name: https-certs-volume
-      #   secret:
-      #     secretName: cert-secret
-      #     items:
-      #     - key: key
-      #       path: key.pem
-      #       mode: 256 
-      #     - key: cert
-      #       path: cert.pem
+      - name: https-certs-volume
+        secret:
+          secretName: cert-secret
+          items:
+          - key: key
+            path: key.pem
+            mode: 256 
+          - key: cert
+            path: cert.pem
       - name: globus-conf-volume
         secret:
           secretName: globus-secret

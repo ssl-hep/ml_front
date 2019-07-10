@@ -17,20 +17,22 @@ var globConf;
 
 if (!TEST) {
     config = require('/etc/ml-front-conf/mlfront-config.json');
-    privateKey = fs.readFileSync('/etc/https-certs/key.pem');
-    certificate = fs.readFileSync('/etc/https-certs/cert.pem');
     globConf = require('/etc/globus-conf/globus-config.json');
+    if (!config.INGRESS_CONTROLLER) {
+        privateKey = fs.readFileSync('/etc/https-certs/key.pem');
+        certificate = fs.readFileSync('/etc/https-certs/cert.pem');
+    }
 }
 else {
     config = require('./kube/test-ml/secrets/config.json');
-    privateKey = fs.readFileSync('./kube/test-ml/secrets/certificates/test-ml.pem');
-    certificate = fs.readFileSync('./kube/test-ml/secrets/certificates/test-ml.pem');
     globConf = require('./kube/test-ml/secrets/globus-config.json');
+    if (!config.INGRESS_CONTROLLER) {
+        privateKey = fs.readFileSync('./kube/test-ml/secrets/certificates/test-ml.pem');
+        certificate = fs.readFileSync('./kube/test-ml/secrets/certificates/test-ml.pem');
+    }
 }
 
 console.log(config);
-
-var credentials = { key: privateKey, cert: certificate };
 
 var session = require('express-session');
 
@@ -682,8 +684,8 @@ app.use((err, req, res, next) => {
     res.status(err.status).send(err.message);
 });
 
-if (!config.TESTING)
-    Server = https.createServer(credentials, app).listen(443);
+if (!config.TESTING && !config.INGRESS_CONTROLLER)
+    https.createServer({ key: privateKey, cert: certificate }, app).listen(443);
 else
     app.listen(80, function () {
         console.log('Listening on port 80.');

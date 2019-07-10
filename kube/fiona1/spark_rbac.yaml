@@ -3,12 +3,12 @@ kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: spark-acc
-  namespace: ml-usatlas-org
+  namespace: fiona1
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: ml-usatlas-org
+  namespace: fiona1
   name: spark-role
 rules:
 - apiGroups: [""] # "" indicates the core API group
@@ -19,11 +19,11 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: spark-runner
-  namespace: ml-usatlas-org
+  namespace: fiona1
 subjects:
 - kind: ServiceAccount
   name: spark-acc
-  namespace: ml-usatlas-org
+  namespace: fiona1
 roleRef:
   kind: Role #this must be Role or ClusterRole
   name: spark-role

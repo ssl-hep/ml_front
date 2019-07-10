@@ -1,60 +1,74 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: ml-front
-  namespace: ml-usatlas-org
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: www.atlas-ml.org
+  name: fiona1
+  namespace: fiona1
   labels:
-    k8s-app: ml-front
+    k8s-app: fiona1
 spec:
-  type: LoadBalancer
+  type: NodePort
   ports:
-  - name: https
-    protocol: TCP
-    port: 443
-    targetPort: 443
   - name: http
     protocol: TCP
     port: 80
     targetPort: 80
   selector:
-    k8s-app: ml-front
+    k8s-app: fiona1
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: fiona1
+  namespace: fiona1
+  labels:
+    k8s-app: fiona1
+  annotations:
+    kubernetes.io/ingress.class: slate
+spec:
+  tls:
+  - hosts:
+    - fiona1.uchicago.edu
+    secretName: fiona1-tls
+  rules:
+  - host: fiona1.uchicago.edu
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: fiona1
+          servicePort: 80
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ml-front  
-  namespace: ml-usatlas-org
+  name: fiona1  
+  namespace: fiona1
   labels:
-    k8s-app: ml-front
+    k8s-app: fiona1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      k8s-app: ml-front
+      k8s-app: fiona1
   template:
     metadata:
       labels:
-        k8s-app: ml-front
+        k8s-app: fiona1
     spec:
       containers:
       - name: ml-front
         image: sslhep/ml_front:latest
         ports:
-          - containerPort: 443
           - containerPort: 80
         livenessProbe:
           httpGet:
-            scheme: HTTPS
+            scheme: HTTP
             path: /healthz
-            port: 443
+            port: 80
           periodSeconds: 60
           initialDelaySeconds: 60
           timeoutSeconds: 10
         volumeMounts:
-        - name: https-certs-volume
-          mountPath: "/etc/https-certs/"
           readOnly: true
         - name: globus-conf-volume
           mountPath: "/etc/globus-conf/"
@@ -63,15 +77,6 @@ spec:
         - name: frontend-conf-volume
           mountPath: "/etc/ml-front-conf/"
       volumes:
-      - name: https-certs-volume
-        secret:
-          secretName: cert-secret
-          items:
-          - key: key
-            path: key.pem
-            mode: 256 
-          - key: cert
-            path: cert.pem
       - name: globus-conf-volume
         secret:
           secretName: globus-secret
@@ -90,4 +95,4 @@ spec:
           items:
           - key: mgconf
             path: config.json
-      serviceAccountName: ml-usatlas-org-fronter
+      serviceAccountName: fiona1-fronter

@@ -15,7 +15,7 @@
     "spec": {
         "rules": [
             {
-                "host": "xxx", {{ .Values.Ingress.Subdomain }}.{{ .Values.SLATE.Cluster.DNSName }}
+                "host": "xxx",
                 "http": {
                     "paths": [
                         {

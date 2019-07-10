@@ -1,61 +1,74 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: ml-front
+  name: ml-usatlas-org
   namespace: ml-usatlas-org
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: www.atlas-ml.org
   labels:
-    k8s-app: ml-front
+    k8s-app: ml-usatlas-org
 spec:
-  type: LoadBalancer
+  type: NodePort
   ports:
-  - name: https
-    protocol: TCP
-    port: 443
-    targetPort: 443
   - name: http
     protocol: TCP
     port: 80
     targetPort: 80
   selector:
-    k8s-app: ml-front
+    k8s-app: ml-usatlas-org
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ml-usatlas-org
+  namespace: ml-usatlas-org
+  labels:
+    k8s-app: ml-usatlas-org
+  annotations:
+    kubernetes.io/ingress.class: slate
+spec:
+  tls:
+  - hosts:
+    - www.atlas-ml.org
+    secretName: ml-usatlas-org-tls
+  rules:
+  - host: www.atlas-ml.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ml-usatlas-org
+          servicePort: 80
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ml-front  
+  name: ml-usatlas-org  
   namespace: ml-usatlas-org
   labels:
-    k8s-app: ml-front
+    k8s-app: ml-usatlas-org
 spec:
   replicas: 1
   selector:
     matchLabels:
-      k8s-app: ml-front
+      k8s-app: ml-usatlas-org
   template:
     metadata:
       labels:
-        k8s-app: ml-front
+        k8s-app: ml-usatlas-org
     spec:
       containers:
       - name: ml-front
         image: sslhep/ml_front:latest
         ports:
-          - containerPort: 443
           - containerPort: 80
         livenessProbe:
           httpGet:
-            scheme: HTTPS
+            scheme: HTTP
             path: /healthz
-            port: 443
+            port: 80
           periodSeconds: 60
           initialDelaySeconds: 60
           timeoutSeconds: 10
         volumeMounts:
-        - name: https-certs-volume
-          mountPath: "/etc/https-certs/"
-          readOnly: true
         - name: globus-conf-volume
           mountPath: "/etc/globus-conf/"
         - name: mg-conf-volume
@@ -63,15 +76,6 @@ spec:
         - name: frontend-conf-volume
           mountPath: "/etc/ml-front-conf/"
       volumes:
-      - name: https-certs-volume
-        secret:
-          secretName: cert-secret
-          items:
-          - key: key
-            path: key.pem
-            mode: 256 
-          - key: cert
-            path: cert.pem
       - name: globus-conf-volume
         secret:
           secretName: globus-secret

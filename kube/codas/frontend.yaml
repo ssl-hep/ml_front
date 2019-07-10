@@ -8,10 +8,6 @@ metadata:
 spec:
   type: NodePort
   ports:
-  # - name: https
-  #   protocol: TCP
-  #   port: 443
-  #   targetPort: 443
   - name: http
     protocol: TCP
     port: 80
@@ -23,6 +19,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: codas
+  namespace: codas
   labels:
     k8s-app: codas
   annotations:
@@ -62,7 +59,6 @@ spec:
       - name: codas
         image: sslhep/ml_front:latest
         ports:
-          # - containerPort: 443
           - containerPort: 80
         livenessProbe:
           httpGet:
@@ -73,9 +69,6 @@ spec:
           initialDelaySeconds: 60
           timeoutSeconds: 10
         volumeMounts:
-        # - name: https-certs-volume
-        #   mountPath: "/etc/https-certs/"
-        #   readOnly: true
         - name: globus-conf-volume
           mountPath: "/etc/globus-conf/"
         - name: mg-conf-volume
@@ -83,15 +76,6 @@ spec:
         - name: frontend-conf-volume
           mountPath: "/etc/ml-front-conf/"
       volumes:
-      # - name: https-certs-volume
-      #   secret:
-      #     secretName: cert-secret
-      #     items:
-      #     - key: key
-      #       path: key.pem
-      #       mode: 256 
-      #     - key: cert
-      #       path: cert.pem
       - name: globus-conf-volume
         secret:
           secretName: globus-secret

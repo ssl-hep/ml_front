@@ -1,0 +1,104 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: codas
+  namespace: ml
+  labels:
+    k8s-app: codas
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  selector:
+    k8s-app: codas
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: codas
+  namespace: ml
+  labels:
+    k8s-app: codas
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  tls:
+  - hosts:
+    - ml-front.nautilus.optiputer.net
+    secretName: codas-tls
+  rules:
+  - host: ml-front.nautilus.optiputer.net
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: codas
+          servicePort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codas  
+  namespace: ml
+  labels:
+    k8s-app: codas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: codas
+  template:
+    metadata:
+      labels:
+        k8s-app: codas
+    spec:
+      containers:
+      - name: codas
+        image: sslhep/ml_front:latest
+        ports:
+          - containerPort: 80
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /healthz
+            port: 80
+          periodSeconds: 60
+          initialDelaySeconds: 60
+          timeoutSeconds: 10
+        resources:
+          requests:
+            cpu: 1
+            memory: "1Gi"
+          limits:
+            cpu: 1
+            memory: "2Gi"
+        volumeMounts:
+        - name: globus-conf-volume
+          mountPath: "/etc/globus-conf/"
+        - name: mg-conf-volume
+          mountPath: "/etc/mg-conf/"
+        - name: frontend-conf-volume
+          mountPath: "/etc/ml-front-conf/"
+      volumes:
+      - name: globus-conf-volume
+        secret:
+          secretName: globus-secret
+          items:
+          - key: gconf
+            path: globus-config.json
+      - name: frontend-conf-volume
+        secret:
+          secretName: config
+          items:
+          - key: mlconf
+            path: mlfront-config.json
+      - name: mg-conf-volume
+        secret:
+          secretName: mg-config
+          items:
+          - key: mgconf
+            path: config.json
+      serviceAccountName: ml-fronter

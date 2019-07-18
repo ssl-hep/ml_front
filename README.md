@@ -35,6 +35,7 @@ http://atlas-kibana.mwt2.org/goto/7ad9cbf9627d180d24e06ac018ac6c4a
 
 
 ## TODO
+* change how upper left corner Title is set (should be in pug.)
 * add shared filesystem
 * add option to mount CVMFS
 * add option to update some service parameters

@@ -101,4 +101,6 @@ spec:
           items:
           - key: mgconf
             path: config.json
+      nodeSelector: 
+        codas/es: "open"
       serviceAccountName: ml-fronter

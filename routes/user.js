@@ -72,16 +72,20 @@ module.exports = function (app, config) {
 
         async update() {
             console.log("Updating user info in ES...");
-            try {
-                const response = await this.es.update({
-                    index: 'mlfront_users', type: 'docs', id: this.id,
-                    body: {
-                        doc: {
-                            "approved_on": this.approved_on,
-                            "approved": this.approved
-                        }
+            const req = {
+                index: 'mlfront_users',
+                type: 'docs',
+                id: this.id,
+                body: {
+                    doc: {
+                        "approved_on": this.approved_on,
+                        "approved": this.approved
                     }
-                });
+                }
+            };
+            console.log(req);
+            try {
+                const response = await this.es.update(req);
                 console.log(response);
             } catch (err) {
                 console.error(err)

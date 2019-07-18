@@ -123,13 +123,13 @@ module.exports = function (app, config) {
                     }
                 });
                 // console.log(response);
-                if (response.hits.total == 0) {
+                if (response.body.hits.total == 0) {
                     console.log("user not found.");
                     return false;
                 }
                 else {
                     console.log("User found.");
-                    var obj = response.hits.hits[0]._source;
+                    var obj = response.body.hits.hits[0]._source;
                     // console.log(obj);
                     // var created_at = new Date(obj.created_at).toUTCString();
                     // var approved_on = new Date(obj.approved_on).toUTCString();
@@ -240,10 +240,10 @@ module.exports = function (app, config) {
                 });
                 // console.log(resp);
                 var toSend = [];
-                if (resp.hits.total > 0) {
-                    // console.log(resp.hits.hits);
-                    for (var i = 0; i < resp.hits.hits.length; i++) {
-                        var obj = resp.hits.hits[i]._source;
+                if (resp.body.hits.total > 0) {
+                    // console.log(resp.body.hits.hits);
+                    for (var i = 0; i < resp.body.hits.hits.length; i++) {
+                        var obj = resp.body.hits.hits[i]._source;
                         if (obj.service !== servicetype) continue;
                         console.log(obj);
                         var start_date = new Date(obj.timestamp).toUTCString();
@@ -291,10 +291,10 @@ module.exports = function (app, config) {
                 });
                 // console.log(resp);
                 var toSend = [];
-                if (resp.hits.total > 0) {
-                    // console.log("Users found:", resp.hits.hits);
-                    for (var i = 0; i < resp.hits.hits.length; i++) {
-                        var obj = resp.hits.hits[i]._source;
+                if (resp.body.hits.total > 0) {
+                    // console.log("Users found:", resp.body.hits.hits);
+                    for (var i = 0; i < resp.body.hits.hits.length; i++) {
+                        var obj = resp.body.hits.hits[i]._source;
                         // console.log(obj);
                         var created_at = new Date(obj.created_at).toUTCString();
                         var approved_on = new Date(obj.approved_on).toUTCString();

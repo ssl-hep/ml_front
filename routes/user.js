@@ -350,9 +350,11 @@ module.exports = function (app, config) {
         if (await user.load()) {
             await user.approve();
             res.status(200).send('User approved:', user.name);
+            // res.render("users", req.session);
         }
-        // res.render("users", req.session);
-        res.res.status(500).send('User not found.');
+        else {
+            res.status(500).send('User not found.');
+        }
     });
 
     return module;

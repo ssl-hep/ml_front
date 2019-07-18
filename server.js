@@ -391,9 +391,9 @@ const jupyterCreator = async (req, res, next) => {
         return;
     }
 
-    req.body.name = req.body.name.raplace(' ', '-');
-    req.body.name = req.body.name.raplace('_', '-');
-    
+    req.body.name = req.body.name.replace(' ', '-');
+    req.body.name = req.body.name.replace('_', '-');
+
     await cleanup(req.body.name);
 
     try {

@@ -1,6 +1,6 @@
 module.exports = function (app, config) {
 
-    var elasticsearch = require('elasticsearch');
+    var elasticsearch = require('@elastic/elasticsearch');
 
     if (!config.TESTING) {
         var config = require('/etc/ml-front-conf/mlfront-config.json');

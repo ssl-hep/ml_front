@@ -477,6 +477,7 @@ const requiresLogin = async (req, res, next) => {
 
     var user = new usr.User(req.session.user_id);
     await user.load();
+    
     if (user.approved === true) {
         console.log("authorized.");
         return next();

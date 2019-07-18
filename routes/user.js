@@ -345,11 +345,14 @@ module.exports = function (app, config) {
     });
 
     app.get('/authorize/:user_id', async function (req, res) {
-        console.log('Authorizing user...');
+        console.log('Authorizing user...', req.params.user_id);
         var user = new module.User(req.params.user_id);
-        await user.load();
-        user.approve();
-        res.render("users", req.session);
+        if (await user.load()) {
+            await user.approve();
+            res.status(200).send('User approved:', user.name);
+        }
+        // res.render("users", req.session);
+        res.res.status(500).send('User not found.');
     });
 
     return module;

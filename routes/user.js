@@ -43,7 +43,7 @@ module.exports = function (app, config) {
                         "affiliation": this.affiliation,
                         "user": this.name,
                         "email": this.email,
-                        "event": config.NAMESPACE,
+                        "event": config.EVENT,
                         "created_at": new Date().getTime(),
                         "approved": this.approved,
                         "approved_on": this.approved_on
@@ -111,7 +111,7 @@ module.exports = function (app, config) {
                         query: {
                             bool: {
                                 must: [
-                                    { match: { event: config.NAMESPACE } },
+                                    { match: { event: config.EVENT } },
                                     { match: { _id: this.id } }
                                 ]
                             }
@@ -149,11 +149,11 @@ module.exports = function (app, config) {
             this.approved_on = new Date().getTime();
             await this.update();
             var body = {
-                from: config.NAMESPACE + "<" + config.NAMESPACE + "@maniac.uchicago.edu>",
+                from: config.EVENT + "<" + config.EVENT + "@maniac.uchicago.edu>",
                 to: this.email,
                 subject: "Authorization approved",
                 text: "Dear " + this.name + ", \n\n\t" +
-                    " your request for access to " + config.NAMESPACE +
+                    " your request for access to " + config.EVENT +
                     " ML front has been approved.\n\nBest regards,\n\tML front Approval system."
             }
             this.send_mail_to_user(body);
@@ -171,12 +171,12 @@ module.exports = function (app, config) {
 
                 var link = 'https://' + config.SITENAME + '/authorize/' + this.id;
                 var data = {
-                    from: config.NAMESPACE + "<" + config.NAMESPACE + "@maniac.uchicago.edu>",
+                    from: config.EVENT + "<" + config.EVENT + "@maniac.uchicago.edu>",
                     to: config.APPROVAL_EMAIL,
                     subject: "Authorization requested",
                     text: "Dear Sir/Madamme, \n\n\t" + this.name +
                         " affiliated with " + this.affiliation +
-                        " requested access to " + config.NAMESPACE +
+                        " requested access to " + config.EVENT +
                         " ML front.\n\tTo approve it use this link " + link +
                         ". To deny the request simply delete this mail.\n\nBest regards,\n\tML front Approval system"
                 }
@@ -281,7 +281,7 @@ module.exports = function (app, config) {
                     index: 'mlfront_users', type: 'docs',
                     body: {
                         size: 1000,
-                        query: { match: { "event": config.NAMESPACE } },
+                        query: { match: { "event": config.EVENT } },
                         sort: { "created_at": { order: "desc" } }
                     }
                 });

@@ -10,7 +10,9 @@ A deployment creates node.js based web frontend. The front end authenticates use
 
  Variable | Meaning | Example value 
 ----|----|----
+ EVENT | This will be used in mails, kibana dashboards | codas2019
  SITENAME | address where the front end will be accessible from  | ml.maniac.uchicago.edu
+ STATIC_PATH | directory containing static site customizations | ml-usatlas-org,
  NAMESPACE | k8s namespace where all of pods and services will run | maniac-ml 
  TITLE | Will be shown in web browser title bar
  SSL | Are JupyterLabs served on https? | false

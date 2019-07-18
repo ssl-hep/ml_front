@@ -39,11 +39,11 @@ var session = require('express-session');
 const app = express();
 
 app.use(express.static('./static'));
-app.use(express.static('./instances/' + config.NAMESPACE + '/static/'));
+app.use(express.static('./instances/' + config.STATIC_PATH + '/static/'));
 
 app.set('view engine', 'pug');
 var path = require('path');
-app.set('views', path.join(__dirname, '/instances/' + config.NAMESPACE));
+app.set('views', path.join(__dirname, '/instances/' + config.STATIC_PATH));
 
 app.use(express.json());       // to support JSON-encoded bodies
 app.use(session({

@@ -391,6 +391,9 @@ const jupyterCreator = async (req, res, next) => {
         return;
     }
 
+    req.body.name = req.body.name.raplace(' ', '-');
+    req.body.name = req.body.name.raplace('_', '-');
+    
     await cleanup(req.body.name);
 
     try {
@@ -477,7 +480,7 @@ const requiresLogin = async (req, res, next) => {
 
     var user = new usr.User(req.session.user_id);
     await user.load();
-    
+
     if (user.approved === true) {
         console.log("authorized.");
         return next();

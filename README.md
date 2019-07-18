@@ -44,7 +44,6 @@ http://atlas-kibana.mwt2.org/goto/7ad9cbf9627d180d24e06ac018ac6c4a
 * add cloud deployments
 * add postfixes to pods/services
 * add ml-front pods monitoring info collection
-* sanitize user pod names
 * SPARK submission
     * submission page
         * file upload (multiple files?)

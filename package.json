@@ -38,5 +38,10 @@
     "requests": "^0.2.2",
     "requires": "^1.0.2",
     "lodash": ">=4.17.13"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.18.0"
   }
 }

@@ -1,6 +1,6 @@
 module.exports = function (app, config) {
 
-    var elasticsearch = require('@elastic/elasticsearch');
+    let elasticsearch = require('@elastic/elasticsearch');
 
     if (!config.TESTING) {
         var config = require('/etc/ml-front-conf/mlfront-config.json');
@@ -11,9 +11,9 @@ module.exports = function (app, config) {
         var mg_config = require('../kube/test-ml/secrets/mg-config.json');
     }
 
-    var mg = require('mailgun-js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
+    let mg = require('mailgun-js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
 
-    var module = {}
+    let module = {}
 
     module.User = class User {
 
@@ -129,7 +129,7 @@ module.exports = function (app, config) {
                 }
                 else {
                     console.log("User found.");
-                    var obj = response.body.hits.hits[0]._source;
+                    let obj = response.body.hits.hits[0]._source;
                     // console.log(obj);
                     // var created_at = new Date(obj.created_at).toUTCString();
                     // var approved_on = new Date(obj.approved_on).toUTCString();
@@ -152,7 +152,7 @@ module.exports = function (app, config) {
             this.approved = true;
             this.approved_on = new Date().getTime();
             await this.update();
-            var body = {
+            let body = {
                 from: config.EVENT + "<" + config.EVENT + "@maniac.uchicago.edu>",
                 to: this.email,
                 subject: "Authorization approved",
@@ -173,8 +173,8 @@ module.exports = function (app, config) {
 
             if (config.hasOwnProperty("APPROVAL_EMAIL")) {
 
-                var link = 'https://' + config.SITENAME + '/authorize/' + this.id;
-                var data = {
+                let link = 'https://' + config.SITENAME + '/authorize/' + this.id;
+                let data = {
                     from: config.EVENT + "<" + config.EVENT + "@maniac.uchicago.edu>",
                     to: config.APPROVAL_EMAIL,
                     subject: "Authorization requested",
@@ -239,16 +239,16 @@ module.exports = function (app, config) {
                     }
                 });
                 // console.log(resp);
-                var toSend = [];
+                let toSend = [];
                 if (resp.body.hits.total > 0) {
                     // console.log(resp.body.hits.hits);
-                    for (var i = 0; i < resp.body.hits.hits.length; i++) {
-                        var obj = resp.body.hits.hits[i]._source;
+                    for (let i = 0; i < resp.body.hits.hits.length; i++) {
+                        let obj = resp.body.hits.hits[i]._source;
                         if (obj.service !== servicetype) continue;
                         console.log(obj);
-                        var start_date = new Date(obj.timestamp).toUTCString();
+                        let start_date = new Date(obj.timestamp).toUTCString();
                         if (servicetype === "privatejupyter") {
-                            var end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
+                            let end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
                             var serv = [obj.service, obj.name, start_date, end_date, obj.gpus, obj.cpus, obj.memory]
                             toSend.push(serv);
                         }
@@ -290,15 +290,15 @@ module.exports = function (app, config) {
                     }
                 });
                 // console.log(resp);
-                var toSend = [];
+                let toSend = [];
                 if (resp.body.hits.total > 0) {
                     // console.log("Users found:", resp.body.hits.hits);
-                    for (var i = 0; i < resp.body.hits.hits.length; i++) {
-                        var obj = resp.body.hits.hits[i]._source;
+                    for (let i = 0; i < resp.body.hits.hits.length; i++) {
+                        let obj = resp.body.hits.hits[i]._source;
                         // console.log(obj);
-                        var created_at = new Date(obj.created_at).toUTCString();
-                        var approved_on = new Date(obj.approved_on).toUTCString();
-                        var serv = [obj.user, obj.email, obj.affiliation, created_at, obj.approved, approved_on]
+                        let created_at = new Date(obj.created_at).toUTCString();
+                        let approved_on = new Date(obj.approved_on).toUTCString();
+                        let serv = [obj.user, obj.email, obj.affiliation, created_at, obj.approved, approved_on]
                         toSend.push(serv);
                     }
                 } else {
@@ -328,8 +328,8 @@ module.exports = function (app, config) {
 
     app.get('/users_data', async function (req, res) {
         console.log('Sending all users info...');
-        var user = new module.User();
-        var data = await user.get_all_users();
+        let user = new module.User();
+        let data = await user.get_all_users();
         res.status(200).send(data);
         console.log('Done.');
     });
@@ -346,10 +346,10 @@ module.exports = function (app, config) {
 
     app.get('/authorize/:user_id', async function (req, res) {
         console.log('Authorizing user...', req.params.user_id);
-        var user = new module.User(req.params.user_id);
+        let user = new module.User(req.params.user_id);
         if (await user.load()) {
             await user.approve();
-            res.status(200).send('User approved:', user.name);
+            res.status(200).send('User approved:' + user.name);
             // res.render("users", req.session);
         }
         else {

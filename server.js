@@ -85,31 +85,29 @@ async function configureKube() {
     console.log('Ilija - error in configureKube\n', err);
     process.exit(2);
   }
-
 }
 
-async function configureRemoteKube(cluster_url, admin, adminpass) {
-  try {
-    console.log('configuring remote k8s client');
-    const client = new Client({
-      config: {
-        url: cluster_url,
-        auth: {
-          user: admin,
-          pass: adminpass,
-        },
-        insecureSkipTlsVerify: true,
-      },
-    });
-    await client.loadSpec();
-    console.log('client configured');
-    return client;
-  } catch (err) {
-    console.log('Error in configureRemoteKube\n', err);
-    process.exit(2);
-  }
-
-}
+// async function configureRemoteKube(cluster_url, admin, adminpass) {
+//   try {
+//     console.log('configuring remote k8s client');
+//     const client = new Client({
+//       config: {
+//         url: cluster_url,
+//         auth: {
+//           user: admin,
+//           pass: adminpass,
+//         },
+//         insecureSkipTlsVerify: true,
+//       },
+//     });
+//     await client.loadSpec();
+//     console.log('client configured');
+//     return client;
+//   } catch (err) {
+//     console.log('Error in configureRemoteKube\n', err);
+//     process.exit(2);
+//   }
+// }
 
 async function cleanup(name) {
   try {
@@ -133,7 +131,7 @@ async function cleanup(name) {
     console.warn(`Unable to delete service ${name}.  Skipping.`);
   }
 
-  if (config.hasOwnProperty('JL_INGRESS')) {
+  if (config.JL_INGRESS) {
     try {
       await client.apis.extensions.v1beta1.namespaces(config.NAMESPACE).ingresses(name).delete();
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -145,7 +143,7 @@ async function cleanup(name) {
 
 }
 
-async function show_pods() {
+async function showPods() {
   console.log('all pods in this namespace');
   try {
     const pods = await client.api.v1.namespaces(config.NAMESPACE).pods.get();
@@ -566,7 +564,6 @@ app.get('/login', async (req, res) => {
 app.get('/logout', function (req, res, next) {
 
   if (req.session.loggedIn) {
-
     // logout from Globus
     let requestOptions = {
       uri: `https://auth.globus.org/v2/web/logout?client_id=${globConf.CLIENT_ID}`,
@@ -582,13 +579,10 @@ app.get('/logout', function (req, res, next) {
       }
       console.log('globus logout success.\n');
     });
-
-
   }
   req.session.destroy();
 
   res.redirect('/');
-
 });
 
 app.get('/authcallback', (req, res) => {
@@ -686,20 +680,20 @@ app.use((err, req, res, next) => {
   res.status(err.status).send(err.message);
 });
 
-if (!config.TESTING && !config.INGRESS_CONTROLLER)
+if (!config.TESTING && !config.INGRESS_CONTROLLER) {
   https.createServer({ key: privateKey, cert: certificate }, app).listen(443);
-else
+} else {
   app.listen(80, function () {
     console.log('Listening on port 80.');
   });
-
+}
 
 async function main() {
 
   try {
     if (!config.TESTING) {
       await configureKube();
-      await show_pods();
+      await showPods();
     }
   } catch (err) {
     console.error('Error: ', err);

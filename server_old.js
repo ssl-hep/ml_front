@@ -135,7 +135,7 @@ async function cleanup(name) {
 
 }
 
-async function show_pods() {
+async function showPods() {
     console.log("all pods in this namespace");
     try {
         const pods = await client.api.v1.namespaces(ml_front_config.NAMESPACE).pods.get();
@@ -684,7 +684,7 @@ async function main() {
 
     try {
         await configureKube();
-        await show_pods();
+        await showPods();
     } catch (err) {
         console.error('Error: ', err);
     }

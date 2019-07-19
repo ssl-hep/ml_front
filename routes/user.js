@@ -60,7 +60,8 @@ module.exports = function us(app, config) {
       console.log('deleting user from ES...');
       try {
         const response = await this.es.deleteByQuery({
-          index: 'mlfront_users', type: 'docs',
+          index: 'mlfront_users',
+          type: 'docs',
           body: { query: { match: { _id: this.id } } },
         });
         console.log(response);
@@ -232,9 +233,17 @@ module.exports = function us(app, config) {
       console.log('getting all services >', servicetype, '< of user:', this.id);
       try {
         const resp = await this.es.search({
-          index: 'ml_front', type: 'docs',
+          index: 'ml_front',
+          type: 'docs',
           body: {
-            query: { match: { owner: this.id } },
+            query: {
+              bool: {
+                must: [
+                  { match: { event: config.EVENT } },
+                  { match: { owner: this.id } },
+                ],
+              },
+            },
             sort: { timestamp: { order: 'desc' } },
           },
         });
@@ -246,14 +255,14 @@ module.exports = function us(app, config) {
             let obj = resp.body.hits.hits[i]._source;
             if (obj.service !== servicetype) continue;
             console.log(obj);
-            let start_date = new Date(obj.timestamp).toUTCString();
+            const startDate = new Date(obj.timestamp).toUTCString();
             if (servicetype === 'privatejupyter') {
-              let end_date = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
-              var serv = [obj.service, obj.name, start_date, end_date, obj.gpus, obj.cpus, obj.memory];
+              const endDate = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
+              const serv = [obj.service, obj.name, startDate, endDate, obj.gpus, obj.cpus, obj.memory];
               toSend.push(serv);
             }
             if (servicetype === 'sparkjob') {
-              var serv = [obj.service, obj.name, start_date, obj.executors, obj.repository];
+              var serv = [obj.service, obj.name, startDate, obj.executors, obj.repository];
               toSend.push(serv);
             }
           }
@@ -282,7 +291,8 @@ module.exports = function us(app, config) {
       console.log('getting all users info from es.');
       try {
         const resp = await this.es.search({
-          index: 'mlfront_users', type: 'docs',
+          index: 'mlfront_users',
+          type: 'docs',
           body: {
             size: 1000,
             query: { match: { event: config.EVENT } },
@@ -294,11 +304,11 @@ module.exports = function us(app, config) {
         if (resp.body.hits.total > 0) {
           // console.log("Users found:", resp.body.hits.hits);
           for (let i = 0; i < resp.body.hits.hits.length; i++) {
-            let obj = resp.body.hits.hits[i]._source;
+            const obj = resp.body.hits.hits[i]._source;
             // console.log(obj);
-            let created_at = new Date(obj.created_at).toUTCString();
-            let approved_on = new Date(obj.approved_on).toUTCString();
-            let serv = [obj.user, obj.email, obj.affiliation, created_at, obj.approved, approved_on];
+            const createdAt = new Date(obj.created_at).toUTCString();
+            const approvedOn = new Date(obj.approved_on).toUTCString();
+            const serv = [obj.user, obj.email, obj.affiliation, createdAt, obj.approved, approvedOn];
             toSend.push(serv);
           }
         } else {
@@ -312,7 +322,7 @@ module.exports = function us(app, config) {
     }
   };
 
-  //probably not needed.
+  // probably not needed.
   app.get('/user', function (req, res) {
     console.log('sending profile info back.');
     res.json({

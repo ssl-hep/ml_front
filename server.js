@@ -235,21 +235,19 @@ async function get_service_link(name) {
 
   try {
     const service = await client.api.v1.namespaces(config.NAMESPACE).services(name).get();
-    if (config.hasOwnProperty('JL_INGRESS')) {
-      link = config.SITENAME;
-      to_replace = link.split('.', 1);
-      link = link.replace(to_replace, name);
+    if (config.JL_INGRESS) {
+      let link = config.SITENAME;
+      const toReplace = link.split('.', 1);
+      link = link.replace(toReplace, name);
       return `https://${link}`;
-    } else {
-      console.log(service.body.spec.ports);
-      link = service.body.metadata.labels.servingat;
-      port = service.body.spec.ports[0].nodePort;
-      if (config.SSL === true) {
-        return `https://${link}:${port}`;
-      } else {
-        return `http://${link}:${port}`;
-      }
     }
+    console.log(service.body.spec.ports);
+    const link = service.body.metadata.labels.servingat;
+    const port = service.body.spec.ports[0].nodePort;
+    if (config.SSL === true) {
+      return `https://${link}:${port}`;
+    }
+    return `http://${link}:${port}`;
   } catch (err) {
     console.log(`can't get service ${name}.`);
   }
@@ -287,51 +285,52 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', ti
     jupyterPodManifest.spec.containers[0].resources.limits['cpu'] = 2 * cpu;
     jupyterPodManifest.spec.containers[0].args[2] = pass;
     jupyterPodManifest.spec.containers[0].args[3] = repo;
-    jupyterPodManifest.spec.serviceAccountName = config.NAMESPACE + '-fronter';
+    jupyterPodManifest.spec.serviceAccountName = `${config.NAMESPACE}-fronter`;
 
     await client.api.v1.namespaces(config.NAMESPACE).pods.post({ body: jupyterPodManifest });
   } catch (err) {
-    console.error('Error in creating jupyter pod:  ' + err);
-    error = new Error('Error in creating jupyter pod:  ' + err);
+    console.error(`Error in creating jupyter pod: ${err}`);
+    const error = new Error(`Error in creating jupyter pod: ${err}`);
     error.status = 500;
     return error;
   }
 
-  if (config.hasOwnProperty('JL_INGRESS')) {
-    try {
-      jupyterIngressManifest = require(config.JL_INGRESS);
-      jupyterIngressManifest.metadata.name = name;
-      jupyterIngressManifest.metadata.namespace = config.NAMESPACE;
-      jupyterIngressManifest.metadata.labels['instance'] = name;
-      link = config.SITENAME;
-      to_replace = link.split('.', 1);
-      jupyterIngressManifest.spec.rules[0].host = link.replace(to_replace, name);
-      jupyterIngressManifest.spec.rules[0].http.paths[0].backend.serviceName = name;
-      await client.apis.extensions.v1beta1.namespaces(config.NAMESPACE).ingresses.post({ body: jupyterIngressManifest });
-    } catch (err) {
-      console.error('Error in creating jupyter ingress:  ' + err);
-      error = new Error('Error in creating jupyter ingress:  ' + err);
-      error.status = 500;
-      return error;
-    }
-  }
-
   try {
-    jupyterServiceManifest = require(config.JL_SERVICE);
+    const jupyterServiceManifest = require(config.JL_SERVICE);
     jupyterServiceManifest.metadata.name = name;
     jupyterServiceManifest.metadata.namespace = config.NAMESPACE;
     jupyterServiceManifest.metadata.labels['instance'] = name;
     jupyterServiceManifest.spec.selector['instance'] = name;
     await client.api.v1.namespaces(config.NAMESPACE).services.post({ body: jupyterServiceManifest });
   } catch (err) {
-    console.error('Error in creating jupyter service:  ' + err);
-    error = new Error('Error in creating jupyter service:  ' + err);
+    console.error(`Error in creating jupyter service: ${err}`);
+    const error = new Error(`Error in creating jupyter service: ${err}`);
     error.status = 500;
     return error;
   }
 
+  if (config.JL_INGRESS) {
+    try {
+      const jupyterIngressManifest = require(config.JL_INGRESS);
+      jupyterIngressManifest.metadata.name = name;
+      jupyterIngressManifest.metadata.namespace = config.NAMESPACE;
+      jupyterIngressManifest.metadata.labels['instance'] = name;
+      const link = config.SITENAME;
+      const toReplace = link.split('.', 1);
+      jupyterIngressManifest.spec.rules[0].host = link.replace(toReplace, name);
+      jupyterIngressManifest.spec.rules[0].http.paths[0].backend.serviceName = name;
+      await client.apis.extensions.v1beta1.namespaces(config.NAMESPACE).ingresses.post({ body: jupyterIngressManifest });
+    } catch (err) {
+      console.error(`Error in creating jupyter ingress: ${err}`);
+      const error = new Error(`Error in creating jupyter ingress: ${err}`);
+      error.status = 500;
+      return error;
+    }
+  }
+
+
   console.log(`Jupyter and service ${name} successfully deployed.`);
-};
+}
 
 async function create_spark_pod(owner, name, path, executors) {
 
@@ -361,7 +360,7 @@ async function create_spark_pod(owner, name, path, executors) {
   }
 
   console.log(`Spark pod ${name} successfully deployed.`);
-};
+}
 
 const jupyterCreator = async (req, res, next) => {
 
@@ -380,8 +379,8 @@ const jupyterCreator = async (req, res, next) => {
   ) {
     console.log('Creating a private JupyterLab.');
     try {
-      req.body.time = parseInt(req.body.time);
-      req.body.gpus = parseInt(req.body.gpus);
+      req.body.time = parseInt(req.body.time, 10);
+      req.body.gpus = parseInt(req.body.gpus, 10);
     } catch (error) {
       res.sendStatus(400).send('unparseable parameters.');
       return;
@@ -407,9 +406,9 @@ const jupyterCreator = async (req, res, next) => {
   try {
     res.link = await get_service_link(req.body.name);
 
-    var user = new usr.User(req.session.user_id);
+    const user = new usr.User(req.session.user_id);
     await user.load();
-    var service_description = {
+    const serviceDescription = {
       service: 'privatejupyter',
       name: req.body.name,
       ttl: req.body.time,
@@ -419,7 +418,7 @@ const jupyterCreator = async (req, res, next) => {
       link: res.link,
       repository: req.body.repository,
     };
-    await user.add_service(service_description);
+    await user.add_service(serviceDescription);
     next();
   } catch (err) {
     console.log('Some error in getting service link.', err);
@@ -672,7 +671,7 @@ app.get('/', async function (req, res) {
     req.session.loggedIn = !config.APPROVAL_REQUIRED;
     req.session.Title = config.TITLE;
     req.session.plugins = config.PLUGINS;
-  };
+  }
   console.log(req.session);
   res.render('index', req.session);
 });

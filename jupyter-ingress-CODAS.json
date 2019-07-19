@@ -3,9 +3,9 @@
   "apiVersion": "extensions/v1beta1",
   "metadata": {
     "name": "xxx",
-    "namespace": "ml",
+    "namespace": "xxx",
     "annotations": {
-      "kubernetes.io/ingress.class": "traefik"
+      "kubernetes.io/ingress.class": "slate"
     },
     "labels": {
       "k8s-app": "privatejupyter",
@@ -13,6 +13,12 @@
     }
   },
   "spec": {
+    "tls": [
+      {
+        "host": "xxx",
+        "secretName": "codas-tls"
+      }
+    ],
     "rules": [
       {
         "host": "xxx",

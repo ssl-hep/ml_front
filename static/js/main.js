@@ -123,6 +123,7 @@
 		data['cpus'] = $("#cpus").val();
 		data['memory'] = $("#memory").val();
 		data['repository'] = $("#customgit").val();
+		data['image'] = $("#imageselection").val();
 		console.log(data);
 		// call REST API to create a Private Jupyter Instance
 		var jqxhr = $.ajax({
@@ -142,7 +143,7 @@
 
 	});
 
-	
+
 	$("#private-spark-start").submit(
 		function (event) {
 

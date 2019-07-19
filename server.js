@@ -267,7 +267,7 @@ async function get_log(name) {
   }
 }
 
-async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', time, repo) {
+async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', time, repo, image) {
 
   console.log('Deploying jupyter: ', name, pass, gpu, cpu, memory, time, repo);
 
@@ -278,6 +278,7 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', ti
     jupyterPodManifest.metadata.labels['time2delete'] = 'ttl-' + String(time);
     jupyterPodManifest.metadata.labels['instance'] = name;
     jupyterPodManifest.metadata.labels['owner'] = owner;
+    jupyterPodManifest.spec.containers[0].image = image;
     jupyterPodManifest.spec.containers[0].resources.requests['nvidia.com/gpu'] = gpu;
     jupyterPodManifest.spec.containers[0].resources.limits['nvidia.com/gpu'] = gpu;
     jupyterPodManifest.spec.containers[0].resources.requests['memory'] = memory + 'Gi';
@@ -394,9 +395,9 @@ const jupyterCreator = async (req, res, next) => {
 
   try {
     await create_jupyter(
-      req.session.user_id,
-      req.body.name, req.body.password,
-      req.body.gpus, req.body.cpus, req.body.memory, req.body.time, req.body.repository);
+      req.session.user_id, req.body.name, req.body.password,
+      req.body.gpus, req.body.cpus, req.body.memory, req.body.time,
+      req.body.repository, req.body.image);
   } catch (err) {
     console.log('Some error in creating jupyter.', err);
     res.status(500).send('Some error in creating your JupyterLab.');

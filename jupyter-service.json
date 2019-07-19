@@ -6,8 +6,7 @@
         "namespace": "xxx",
         "labels": {
             "k8s-app": "privatejupyter",
-            "instance": "xxx",
-            "servingat": "ml.usatlas.org"
+            "instance": "xxx"
         }
     },
     "spec": {

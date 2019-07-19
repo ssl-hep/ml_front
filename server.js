@@ -64,7 +64,7 @@ const { Client } = require('kubernetes-client');
 const k8s_config = require('kubernetes-client').config;
 
 
-var client;
+let client;
 
 // GLOBUS STUFF
 var auth = 'Basic ' + new Buffer(globConf.CLIENT_ID + ':' + globConf.CLIENT_SECRET).toString('base64');

@@ -3,7 +3,7 @@
     "apiVersion": "extensions/v1beta1",
     "metadata": {
         "name": "xxx",
-        "namespace": "ml",
+        "namespace": "xxx",
         "annotations": {
             "kubernetes.io/ingress.class": "slate"
         },

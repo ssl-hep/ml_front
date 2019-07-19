@@ -301,6 +301,7 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', ti
     try {
       jupyterIngressManifest = require(config.JL_INGRESS);
       jupyterIngressManifest.metadata.name = name;
+      jupyterIngressManifest.metadata.namespace = config.NAMESPACE;
       jupyterIngressManifest.metadata.labels['instance'] = name;
       link = config.SITENAME;
       to_replace = link.split('.', 1);

@@ -234,13 +234,16 @@ async function get_service_link(name) {
   console.log(`Looking for service ${name}.`);
 
   try {
-    const service = await client.api.v1.namespaces(config.NAMESPACE).services(name).get();
     if (config.JL_INGRESS) {
-      let link = config.SITENAME;
-      const toReplace = link.split('.', 1);
-      link = link.replace(toReplace, name);
-      return `https://${link}`;
+      const ingress = await client.api.v1.namespaces(config.NAMESPACE).ingresses(name).get();
+      console.log(ingress.body);
+      const link = ingress.body.spec.rules[0].host;
+      if (config.SSL === true) {
+        return `https://${link}`;
+      }
+      return `http://${link}`;
     }
+    const service = await client.api.v1.namespaces(config.NAMESPACE).services(name).get();
     console.log(service.body.spec.ports);
     const link = service.body.metadata.labels.servingat;
     const port = service.body.spec.ports[0].nodePort;

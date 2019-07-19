@@ -235,7 +235,7 @@ async function get_service_link(name) {
 
   try {
     if (config.JL_INGRESS) {
-      const ingress = await client.api.v1.namespaces(config.NAMESPACE).ingresses(name).get();
+      const ingress = await client.apis.extensions.v1beta1.namespaces(config.NAMESPACE).ingresses(name).get();
       console.log(ingress.body);
       const link = ingress.body.spec.rules[0].host;
       if (config.SSL === true) {
@@ -252,7 +252,7 @@ async function get_service_link(name) {
     }
     return `http://${link}:${port}`;
   } catch (err) {
-    console.log(`can't get service ${name}.`);
+    console.log(`can't get service ${name}. Err: ${err}`);
   }
 
 }
@@ -291,6 +291,7 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', ti
     jupyterPodManifest.spec.serviceAccountName = `${config.NAMESPACE}-fronter`;
 
     await client.api.v1.namespaces(config.NAMESPACE).pods.post({ body: jupyterPodManifest });
+    console.log('pod deployed.');
   } catch (err) {
     console.error(`Error in creating jupyter pod: ${err}`);
     const error = new Error(`Error in creating jupyter pod: ${err}`);
@@ -305,6 +306,7 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', ti
     jupyterServiceManifest.metadata.labels['instance'] = name;
     jupyterServiceManifest.spec.selector['instance'] = name;
     await client.api.v1.namespaces(config.NAMESPACE).services.post({ body: jupyterServiceManifest });
+    console.log('service deployed.');
   } catch (err) {
     console.error(`Error in creating jupyter service: ${err}`);
     const error = new Error(`Error in creating jupyter service: ${err}`);
@@ -333,6 +335,7 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', ti
       }
       jupyterIngressManifest.spec.rules[0].http.paths[0].backend.serviceName = name;
       await client.apis.extensions.v1beta1.namespaces(config.NAMESPACE).ingresses.post({ body: jupyterIngressManifest });
+      console.log('ingress deployed.');
     } catch (err) {
       console.error(`Error in creating jupyter ingress: ${err}`);
       const error = new Error(`Error in creating jupyter ingress: ${err}`);
@@ -341,8 +344,7 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', ti
     }
   }
 
-
-  console.log(`Jupyter and service ${name} successfully deployed.`);
+  console.log(`Jupyter: ${name} successfully deployed.`);
 }
 
 async function create_spark_pod(owner, name, path, executors) {

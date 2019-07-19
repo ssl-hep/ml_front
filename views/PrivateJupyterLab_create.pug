@@ -44,6 +44,11 @@ block content
                             label(for='customgit') Check out your github repo
                             input#customgit.form-control(type='text')
                         .form-group
+                            label(for='imageselection') Select prefered image    
+                            select#imageselection
+                                each image in images
+                                    option #{image}
+                        .form-group
                             button#private_jupyter_create_button.btn.btn-primary START
 
 

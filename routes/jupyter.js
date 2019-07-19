@@ -1,4 +1,4 @@
-module.exports = function pj(app) {
+module.exports = function pj(app, config) {
   app.get('/private_jupyter_lab_manage', async (req, res) => {
     console.log('Private Jupyter Lab called!');
     res.render('PrivateJupyterLab_manage', req.session);
@@ -6,6 +6,12 @@ module.exports = function pj(app) {
 
   app.get('/private_jupyter_lab_create', async (req, res) => {
     console.log('Private Jupyter Lab create called!');
-    res.render('PrivateJupyterLab_create', req.session);
+    const params = {
+      loggedIn: req.session.loggedIn,
+      Title: config.TITLE,
+      plugins: config.PLUGINS,
+      images: config.IMAGES,
+    };
+    res.render('PrivateJupyterLab_create', params);
   });
 };

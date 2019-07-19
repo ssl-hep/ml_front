@@ -57,7 +57,7 @@ app.use(session({
 const usr = require('./routes/user')(app, config);
 // require('./routes/user')(app);
 require('./routes/spark')(app);
-require('./routes/jupyter')(app);
+require('./routes/jupyter')(app, config);
 
 // k8s stuff
 const { Client } = require('kubernetes-client');
@@ -242,8 +242,7 @@ async function get_service_link(name) {
       to_replace = link.split('.', 1);
       link = link.replace(to_replace, name);
       return `https://${link}`;
-    }
-    else {
+    } else {
       console.log(service.body.spec.ports);
       link = service.body.metadata.labels.servingat;
       port = service.body.spec.ports[0].nodePort;

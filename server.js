@@ -316,8 +316,13 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', ti
       jupyterIngressManifest.metadata.namespace = config.NAMESPACE;
       jupyterIngressManifest.metadata.labels['instance'] = name;
       const link = config.SITENAME;
-      const toReplace = link.split('.', 1);
-      jupyterIngressManifest.spec.rules[0].host = link.replace(toReplace, name);
+      const dotsInLink = link.split('.').length - 1;
+      if (dotsInLink === 2) {
+        jupyterIngressManifest.spec.rules[0].host = `${name}.${link}`;
+      } else {
+        const toReplace = link.split('.', 1);
+        jupyterIngressManifest.spec.rules[0].host = link.replace(toReplace, name);
+      }
       jupyterIngressManifest.spec.rules[0].http.paths[0].backend.serviceName = name;
       await client.apis.extensions.v1beta1.namespaces(config.NAMESPACE).ingresses.post({ body: jupyterIngressManifest });
     } catch (err) {

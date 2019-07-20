@@ -46,7 +46,8 @@
                         "mountPath": "/data",
                         "readOnly": false
                     }
-                ]
+                ],
+                "imagePullPolicy": "Always"
             }
         ],
         "volumes": [

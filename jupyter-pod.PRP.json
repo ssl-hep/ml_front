@@ -59,6 +59,13 @@
             }
         ],
         "restartPolicy": "Always",
-        "serviceAccountName": "xxx"
+        "serviceAccountName": "xxx",
+        "tolerations": [
+            {
+                "effect": "NoSchedule",
+                "key": "nautilus.io/suncave",
+                "operator": "Exists"
+            }
+        ]
     }
 }

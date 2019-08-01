@@ -70,11 +70,11 @@ spec:
           timeoutSeconds: 10
         resources:
           requests:
-            cpu: 1
-            memory: "1Gi"
+            cpu: 0.1
+            # memory: "1Gi"
           limits:
-            cpu: 1
-            memory: "2Gi"
+            cpu: .2
+            # memory: "2Gi"
         volumeMounts:
         - name: globus-conf-volume
           mountPath: "/etc/globus-conf/"
@@ -101,6 +101,13 @@ spec:
           items:
           - key: mgconf
             path: config.json
+      tolerations:
+        - effect: "NoSchedule"
+          key: "nautilus.io/suncave"
+          operator: "Exists"
+        - effect: "NoSchedule"
+          key: "suncave"
+          operator: "Exists"
       nodeSelector: 
         codas/es: "open"
       serviceAccountName: ml-fronter

@@ -124,7 +124,7 @@ module.exports = function us(app, config) {
           },
         });
         // console.log(response);
-        if (response.body.hits.total == 0) {
+        if (response.body.hits.total.value == 0) {
           console.log('user not found.');
           return false;
         }
@@ -249,7 +249,7 @@ module.exports = function us(app, config) {
         });
         // console.log(resp);
         let toSend = [];
-        if (resp.body.hits.total > 0) {
+        if (resp.body.hits.total.value > 0) {
           // console.log(resp.body.hits.hits);
           for (let i = 0; i < resp.body.hits.hits.length; i++) {
             let obj = resp.body.hits.hits[i]._source;
@@ -301,7 +301,7 @@ module.exports = function us(app, config) {
         });
         // console.log(resp);
         let toSend = [];
-        if (resp.body.hits.total > 0) {
+        if (resp.body.hits.total.value > 0) {
           // console.log("Users found:", resp.body.hits.hits);
           for (let i = 0; i < resp.body.hits.hits.length; i++) {
             const obj = resp.body.hits.hits[i]._source;

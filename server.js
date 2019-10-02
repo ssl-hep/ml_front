@@ -320,15 +320,7 @@ async function create_jupyter(owner, name, pass, gpu, cpu = 1, memory = '12', ti
       jupyterIngressManifest.metadata.name = name;
       jupyterIngressManifest.metadata.namespace = config.NAMESPACE;
       jupyterIngressManifest.metadata.labels['instance'] = name;
-      const link = config.SITENAME;
-      let host;
-      const dotsInLink = link.split('.').length - 1;
-      if (dotsInLink === 2) {
-        host = `${name}.${link}`;
-      } else {
-        const toReplace = link.split('.', 1);
-        host = link.replace(toReplace, name);
-      }
+      const host = name + config.SITENAME.substring(config.SITENAME.indexOf('.'));
       jupyterIngressManifest.spec.rules[0].host = host;
       if (jupyterIngressManifest.spec.tls) {
         jupyterIngressManifest.spec.tls.host = host;

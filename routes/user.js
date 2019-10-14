@@ -35,7 +35,6 @@ module.exports = function us(app, config) {
       try {
         const response = await this.es.index({
           index: 'mlfront_users',
-          type: 'docs',
           id: this.id,
           refresh: true,
           body: {
@@ -61,7 +60,6 @@ module.exports = function us(app, config) {
       try {
         const response = await this.es.deleteByQuery({
           index: 'mlfront_users',
-          type: 'docs',
           body: { query: { match: { _id: this.id } } },
         });
         console.log(response);
@@ -75,7 +73,6 @@ module.exports = function us(app, config) {
       console.log('Updating user info in ES...');
       const req = {
         index: 'mlfront_users',
-        type: 'docs',
         id: this.id,
         body: {
           doc: {
@@ -111,7 +108,7 @@ module.exports = function us(app, config) {
 
       try {
         const response = await this.es.search({
-          index: 'mlfront_users', type: 'docs',
+          index: 'mlfront_users',
           body: {
             query: {
               bool: {
@@ -200,7 +197,7 @@ module.exports = function us(app, config) {
         service.user = this.name;
         console.log('creating service in es: ', service);
         await this.es.index({
-          index: 'ml_front', type: 'docs', body: service,
+          index: 'ml_front', body: service,
         }, function (err, resp, status) {
           console.log('from ES indexer:', resp);
         });
@@ -214,7 +211,7 @@ module.exports = function us(app, config) {
       console.log('not implemented yet.');
       // try {
       //     const response = await this.es.update({
-      //         index: 'ml_front', type: 'docs', id: this.id,
+      //         index: 'ml_front',  id: this.id,
       //         body: {
       //             doc: {
       //                 "terminated_on": new Date().getTime(),
@@ -234,7 +231,6 @@ module.exports = function us(app, config) {
       try {
         const resp = await this.es.search({
           index: 'ml_front',
-          type: 'docs',
           body: {
             query: {
               bool: {
@@ -292,7 +288,6 @@ module.exports = function us(app, config) {
       try {
         const resp = await this.es.search({
           index: 'mlfront_users',
-          type: 'docs',
           body: {
             size: 1000,
             query: { match: { event: config.EVENT } },

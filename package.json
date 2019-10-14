@@ -1,6 +1,6 @@
 {
   "name": "ml_front",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a frontend for k8s ML resources.",
   "main": "server.js",
   "scripts": {
@@ -24,15 +24,15 @@
   "homepage": "https://github.com/ivukotic/ML_front#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
-    "cookies": "^0.7.3",
+    "cookies": "^0.8.0",
     "@elastic/elasticsearch": "^7.3.0",
     "express": "^4.17.1",
-    "express-session": "^1.16.2",
+    "express-session": "^1.17.0",
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "kubernetes-client": "^8.3.4",
     "mailgun-js": "^0.22.0",
-    "npm": "^6.11.3",
+    "npm": "^6.12.0",
     "pug": "^2.0.4",
     "request": "^2.88.0",
     "requests": "^0.3.0",
@@ -40,7 +40,7 @@
     "lodash": ">=4.17.15"
   },
   "devDependencies": {
-    "eslint": "^6.5.0",
+    "eslint": "^6.5.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2"
   }

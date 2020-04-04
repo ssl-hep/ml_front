@@ -27,7 +27,7 @@ nav#mainNav.navbar.navbar-expand-lg.fixed-top(style='background-image: linear-gr
               a.dropdown-item( href='/users') Users
             if (plugins)
               if (plugins.includes('MONITOR'))
-                a.dropdown-item(href='https://grafana.mwt2.org/dashboard/db/ml-gpu-utilization?orgId=1&from=now-6h&to=now' target='_blank') Monitor
+                a.dropdown-item(href=plugins.MONITOR target='_blank') Monitor
 
 
         if (!loggedIn)

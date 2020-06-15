@@ -67,16 +67,20 @@ let client;
 
 async function configureKube() {
   try {
-    console.log('configuring k8s client');
+    console.log('configuring k8s client 1');
 
-    // client = new Client({ k8sConfig, backend: new Request(k8sConfig), version: '1.18' });
+    // client = new Client({ backend: new Request(k8sConfig), version: '1.18' });
 
     const kc = new k8s.KubeConfig();
     kc.loadFromCluster();
 
     // const config = require('kubernetes-client/backends/request').config;
     // const Request = require('kubernetes-client/backends/request');
-    const backend = new Request({ kc });
+
+    const { KubeConfig } = require('kubernetes-client');
+    const kubeconfig = new KubeConfig();
+    kubeconfig.loadFromDefault();
+    const backend = new Request({ kubeconfig });
     client = new Client({ backend, version: '1.18' });
 
     await client.loadSpec();

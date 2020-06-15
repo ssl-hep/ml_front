@@ -5,7 +5,7 @@ const https = require('https');
 // const http = require('http');
 const mrequest = require('request');
 const { Client } = require('kubernetes-client');
-const k8s = require('@kubernetes/client-node'); // official
+// const k8s = require('@kubernetes/client-node'); // official
 const Request = require('kubernetes-client/backends/request');
 // const k8sConfig = require('kubernetes-client/backends/request').config;
 const session = require('express-session');
@@ -77,11 +77,14 @@ async function configureKube() {
     // const config = require('kubernetes-client/backends/request').config;
     // const Request = require('kubernetes-client/backends/request');
 
-    const { KubeConfig } = require('kubernetes-client');
-    const kubeconfig = new KubeConfig();
-    kubeconfig.loadFromDefault();
-    const backend = new Request({ kubeconfig });
-    client = new Client({ backend, version: '1.18' });
+    // const { KubeConfig } = require('kubernetes-client');
+    // const kubeconfig = new KubeConfig();
+    // kubeconfig.loadFromDefault();
+    // const backend = new Request({ kubeconfig });
+    // client = new Client({ backend, version: '1.18' });
+
+    const backend = new Request(Request.config.getInCluster());
+    client = new Client({ backend });
 
     await client.loadSpec();
     console.log('client configured');

@@ -6,8 +6,8 @@ const https = require('https');
 const mrequest = require('request');
 const { Client } = require('kubernetes-client');
 const Request = require('kubernetes-client/backends/request');
-// const k8s = require('@kubernetes/client-node');
-const k8sConfig = require('kubernetes-client/backends/request').config;
+const k8s = require('@kubernetes/client-node');
+// const k8sConfig = require('kubernetes-client/backends/request').config;
 const session = require('express-session');
 
 console.log('ML_front server starting ... ');
@@ -64,15 +64,8 @@ require('./routes/jupyter')(app, config);
 const auth = 'Basic ' + new Buffer(globConf.CLIENT_ID + ':' + globConf.CLIENT_SECRET).toString('base64');
 
 // k8s stuff
-
-// old
-// const k8s_config = require('kubernetes-client').config;
-
-// new way
-
-// official way
-// const k8sConfig = new k8s.KubeConfig();
-// k8sConfig.loadFromCluster();
+const k8sConfig = new k8s.KubeConfig();
+k8sConfig.loadFromCluster();
 
 let client;
 
@@ -80,7 +73,7 @@ async function configureKube() {
   try {
     console.log('configuring k8s client');
 
-    client = new Client({ backend: new Request(k8sConfig), version: '1.18' });
+    client = new Client({ k8sConfig, backend: new Request(k8sConfig), version: '1.18' });
     await client.loadSpec();
     console.log('client configured');
     return client;

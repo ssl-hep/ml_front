@@ -7,6 +7,10 @@
     "labels": {
       "k8s-app": "privatejupyter",
       "instance": "xxx"
+    },
+    "annotations": {
+      "kubernetes.io/ingress.class": "slate",
+      "cert-manager.io/cluster-issuer": "letsencrypt-prod"
     }
   },
   "spec": {

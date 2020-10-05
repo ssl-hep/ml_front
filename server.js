@@ -657,7 +657,7 @@ app.get('/authcallback', (req, res) => {
       if (found === false) {
         await user.write();
       }
-      console.log('user>>>', user);
+      console.log('user is authorized:', user.approved);
       req.session.authorized = user.approved;
       if (user.approved === false) {
         user.ask_for_approval();
@@ -695,7 +695,8 @@ app.get('/', async (req, res) => {
 });
 
 app.use((req, res) => {
-  console.error('Unexisting page requested');
+  console.error('Unexisting page requested:', req.path);
+  console.error('Parameters:', req.params);
   res.status(404);
   res.render('error', { error: 'Not Found' });
 });

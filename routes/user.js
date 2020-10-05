@@ -25,8 +25,7 @@ module.exports = function us(app, config) {
       }
       this.created_at = new Date().getTime();
       this.tzar = config.APPROVAL_EMAIL;
-      if (id)
-        this.id = id;
+      if (id) { this.id = id; }
     }
 
     async write() {
@@ -192,7 +191,7 @@ module.exports = function us(app, config) {
         console.log('creating service in es: ', service);
         await this.es.index({
           index: 'ml_front', body: service,
-        }, function (err, resp, status) {
+        }, (err, resp, _status) => {
           console.log('from ES indexer:', resp);
         });
       } catch (err) {
@@ -311,7 +310,7 @@ module.exports = function us(app, config) {
   };
 
   // probably not needed.
-  app.get('/user', function (req, res) {
+  app.get('/user', (req, res) => {
     console.log('sending profile info back.');
     res.json({
       loggedIn: req.session.loggedIn,
@@ -324,33 +323,31 @@ module.exports = function us(app, config) {
     });
   });
 
-  app.get('/users_data', async function (req, res) {
+  app.get('/users_data', async (req, res) => {
     console.log('Sending all users info...');
-    let user = new module.User();
-    let data = await user.get_all_users();
+    const user = new module.User();
+    const data = await user.get_all_users();
     res.status(200).send(data);
     console.log('Done.');
   });
 
-  app.get('/profile', async function (req, res) {
+  app.get('/profile', async (req, res) => {
     console.log('profile called!');
     res.render('profile', req.session);
   });
 
-  app.get('/users', async function (req, res) {
+  app.get('/users', async (req, res) => {
     console.log('users called!');
     res.render('users', req.session);
   });
 
-  app.get('/authorize/:user_id', async function (req, res) {
+  app.get('/authorize/:user_id', async (req, res) => {
     console.log('Authorizing user...', req.params.user_id);
-    let user = new module.User(req.params.user_id);
+    const user = new module.User(req.params.user_id);
     if (await user.load()) {
       await user.approve();
-      res.status(200).send('User approved:' + user.name);
-      // res.render("users", req.session);
-    }
-    else {
+      res.status(200).send(`User approved:${user.name}`);
+    } else {
       res.status(500).send('User not found.');
     }
   });

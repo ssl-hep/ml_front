@@ -657,6 +657,7 @@ app.get('/authcallback', (req, res) => {
       if (found === false) {
         await user.write();
       }
+      console.log('user>>>', user);
       req.session.authorized = user.approved;
       if (user.approved === false) {
         user.ask_for_approval();

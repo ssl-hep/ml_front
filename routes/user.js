@@ -149,27 +149,23 @@ module.exports = function us(app, config) {
       this.approved = true;
       this.approved_on = new Date().getTime();
       await this.update();
-      let body = {
-        from: config.EVENT + '<' + config.EVENT + '@maniac.uchicago.edu>',
+      const body = {
+        from: `${config.EVENT}<${config.EVENT}@maniac.uchicago.edu>`,
         to: this.email,
         subject: 'Authorization approved',
-        text: 'Dear ' + this.name + ', \n\n\t' +
-          ' your request for access to ' + config.EVENT +
-          ' ML front has been approved.\n\nBest regards,\n\tML front Approval system.',
+        text: `Dear ${this.name},\n\n\tyour request for access to ${config.EVENT} ML front has been approved.\n\nBest regards,\n\tML front Approval system.`,
       };
       this.send_mail_to_user(body);
     }
 
     send_mail_to_user(data) {
-      this.mg.messages().send(data, function (error, body) {
+      this.mg.messages().send(data, (error, body) => {
         console.log(body);
       });
     }
 
     ask_for_approval() {
-
       if (config.hasOwnProperty('APPROVAL_EMAIL')) {
-
         let link = 'https://' + config.SITENAME + '/authorize/' + this.id;
         let data = {
           from: config.EVENT + '<' + config.EVENT + '@maniac.uchicago.edu>',
@@ -186,7 +182,6 @@ module.exports = function us(app, config) {
       else {
         console.error("Approval person's mail or mailgun key not configured.");
       }
-
     }
 
     async add_service(service) {
@@ -282,7 +277,6 @@ module.exports = function us(app, config) {
     }
 
     async get_all_users() {
-
       console.log('getting all users info from es.');
       try {
         const resp = await this.es.search({

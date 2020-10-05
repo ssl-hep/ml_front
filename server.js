@@ -694,9 +694,11 @@ app.get('/', async (req, res) => {
   res.render('index', req.session);
 });
 
-app.use((err, _req, res) => { // , _next
-  console.error('Error in error handler: ', err.message);
-  res.status(err.status).send(err.message);
+app.use((err, _req, res) => {
+  if (err) {
+    console.error('Error in error handler: ', err.message);
+    res.status(err.status).send(err.message);
+  }
 });
 
 if (!config.TESTING && !config.INGRESS_CONTROLLER) {

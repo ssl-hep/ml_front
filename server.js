@@ -694,11 +694,10 @@ app.get('/', async (req, res) => {
   res.render('index', req.session);
 });
 
-app.use((err, _req, res) => {
-  if (err) {
-    console.error('Error in error handler: ', err.message);
-    res.status(err.status).send(err.message);
-  }
+app.use((req, res) => {
+  console.error('Unexisting page requested');
+  res.status(404);
+  res.render('error', { error: 'Not Found' });
 });
 
 if (!config.TESTING && !config.INGRESS_CONTROLLER) {

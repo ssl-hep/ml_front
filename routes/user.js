@@ -120,7 +120,7 @@ module.exports = function us(app, config) {
           },
         });
 
-        console.info(response.body.hits);
+        console.debug(response.body.hits);
 
         if (response.body.hits.total.value === 0) {
           console.log('user not found.');

@@ -14,6 +14,8 @@ kubectl create secret -n ml-usatlas-org generic globus-secret --from-file=gconf=
 kubectl delete secret -n ml-usatlas-org config
 kubectl create secret -n ml-usatlas-org generic config --from-file=mlconf=secrets/config.json
 
+kubectl delete secret -n ml-usatlas-org mg-config
 kubectl create secret -n ml-usatlas-org generic mg-config --from-file=mgconf=secrets/mg-config.json
 
+kubectl delete -f frontend.yaml
 kubectl create -f frontend.yaml

@@ -14,7 +14,6 @@ module.exports = function us(app, config) {
   let module = {};
 
   module.User = class User {
-
     constructor(id = null) {
       this.es = new elasticsearch.Client({ node: config.ES_HOST, log: 'error' });
       this.mg = require('mailgun-js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
@@ -120,25 +119,25 @@ module.exports = function us(app, config) {
             },
           },
         });
-        // console.log(response);
-        if (response.body.hits.total.value == 0) {
+
+        console.info(response);
+
+        if (response.body.hits.total.value === 0) {
           console.log('user not found.');
           return false;
         }
-        else {
-          console.log('User found.');
-          let obj = response.body.hits.hits[0]._source;
-          // console.log(obj);
-          // var created_at = new Date(obj.created_at).toUTCString();
-          // var approved_on = new Date(obj.approved_on).toUTCString();
-          this.name = obj.user;
-          this.email = obj.email;
-          this.affiliation = obj.affiliation;
-          this.created_at = obj.created_at;
-          this.approved = obj.approved;
-          this.approved_on = obj.approved_on;
-          return true;
-        }
+        console.log('User found.');
+        const obj = response.body.hits.hits[0]._source;
+        // console.log(obj);
+        // var created_at = new Date(obj.created_at).toUTCString();
+        // var approved_on = new Date(obj.approved_on).toUTCString();
+        this.name = obj.user;
+        this.email = obj.email;
+        this.affiliation = obj.affiliation;
+        this.created_at = obj.created_at;
+        this.approved = obj.approved;
+        this.approved_on = obj.approved_on;
+        return true;
       } catch (err) {
         console.error(err);
       }

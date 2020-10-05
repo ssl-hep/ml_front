@@ -1,4 +1,4 @@
-FROM node:carbon
+FROM node:buster
 
 LABEL maintainer Ilija Vukotic <ivukotic@cern.ch>
 

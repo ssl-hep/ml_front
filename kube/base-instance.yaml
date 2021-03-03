@@ -1,0 +1,85 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: base-instance
+  namespace: maniac-ml
+  labels:
+    k8s-app: privatejupyter
+    instance: base-instance
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 9999
+  selector:
+    k8s-app: privatejupyter
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: base-instance
+  namespace: maniac-ml
+  labels:
+    k8s-app: privatejupyter
+    instance: base-instance
+  annotations:
+    kubernetes.io/ingress.class: slate
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - base.atlas-ml.org
+      secretName: auto-generated-base
+  rules:
+    - host: base.atlas-ml.org
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: base-instance
+              servicePort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: base-instance
+  namespace: maniac-ml
+  creationTimestamp: "2020-11-01T00:00:00Z"
+  labels:
+    instance: base-instance
+    k8s-app: privatejupyter
+    repo: xxx
+    owner: xxx
+    time2delete: ttl-180
+spec:
+  containers:
+    - args:
+        - /.run
+        - /ML_platform_tests/SetupPrivateJupyterLab.sh
+        - base-instance
+        - ""
+      image: ivukotic/ml_platform_auto:latest
+      imagePullPolicy: Always
+      name: privatejupyter
+      ports:
+        - containerPort: 9999
+          protocol: TCP
+      resources:
+        limits:
+          cpu: "2"
+          memory: 2Gi
+        requests:
+          cpu: "1"
+          memory: 1Gi
+      volumeMounts:
+        - mountPath: /data
+          name: local-scratch
+  nodeSelector:
+    mlnode: "true"
+  volumes:
+    - hostPath:
+        path: /data
+        type: ""
+      name: local-scratch

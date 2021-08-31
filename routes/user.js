@@ -9,14 +9,21 @@ module.exports = function us(app, config) {
     var mg_config = require('../kube/test-ml/secrets/mg-config.json');
   }
 
-  let mg = require('mailgun-js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
+  const formData = require('form-data');
+  const Mailgun = require('mailgun.js');
+  const mailgun = new Mailgun(formData);
+  const mg = mailgun.client({username: 'api', key: mg_config.APPROVAL_MG});
+  // old client
+  // let mg = require('mailgun.js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
+
 
   let module = {};
 
   module.User = class User {
     constructor(id = null) {
       this.es = new elasticsearch.Client({ node: config.ES_HOST, log: 'error' });
-      this.mg = require('mailgun-js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
+      // this.mg = require('mailgun-js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
+      this.mg = mailgun.client({username: 'api', key: mg_config.APPROVAL_MG});
       this.approved_on = 0;
       this.approved = false;
       if (!config.APPROVAL_REQUIRED) {

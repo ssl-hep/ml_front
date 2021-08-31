@@ -15,7 +15,7 @@ spec:
   selector:
     k8s-app: maniac-ml
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: maniac-ml
@@ -35,9 +35,12 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: maniac-ml
-              servicePort: 80
+              service:
+                name: maniac-ml
+                port:
+                  number: 80
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -15,7 +15,7 @@ spec:
   selector:
     k8s-app: fiona1
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: fiona1
@@ -34,9 +34,12 @@ spec:
     http:
       paths:
       - path: /
-        backend:
-          serviceName: fiona1
-          servicePort: 80
+            pathType: Prefix
+            backend:
+              service:
+                name: fiona1
+                port:
+                  number: 80
 ---
 apiVersion: apps/v1
 kind: Deployment

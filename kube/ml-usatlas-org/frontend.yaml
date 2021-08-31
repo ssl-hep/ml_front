@@ -15,7 +15,7 @@ spec:
   selector:
     k8s-app: ml-usatlas-org
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ml-usatlas-org
@@ -35,9 +35,12 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: ml-usatlas-org
-              servicePort: 80
+              service:
+                name: ml-usatlas-org
+                port:
+                  number: 80
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -1,6 +1,6 @@
 {
   "kind": "Ingress",
-  "apiVersion": "extensions/v1beta1",
+  "apiVersion": "networking.k8s.io/v1",
   "metadata": {
     "name": "xxx",
     "namespace": "xxx",
@@ -26,9 +26,14 @@
           "paths": [
             {
               "path": "/",
+              "pathType": "Prefix",
               "backend": {
-                "serviceName": "xxx",
-                "servicePort": 80
+                "service": {
+                  "name": "xxx",
+                  "port": {
+                    "number": 80
+                  }
+                }
               }
             }
           ]

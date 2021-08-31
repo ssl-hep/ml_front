@@ -4,10 +4,8 @@ const express = require('express');
 const https = require('https');
 // const http = require('http');
 const mrequest = require('request');
-const { Client } = require('kubernetes-client');
-// const k8s = require('@kubernetes/client-node'); // official
-const Request = require('kubernetes-client/backends/request');
-// const k8sConfig = require('kubernetes-client/backends/request').config;
+const k8s = require('@kubernetes/client-node');
+
 const session = require('express-session');
 
 console.log('ML_front server starting ... ');
@@ -63,42 +61,29 @@ require('./routes/jupyter')(app, config);
 // GLOBUS STUFF
 const auth = 'Basic ' + new Buffer(globConf.CLIENT_ID + ':' + globConf.CLIENT_SECRET).toString('base64');
 
-let client;
+let k8sCoreApi;
+let k8sAppsApi;
+let k8sNetwApi;
 
 async function configureKube() {
   try {
-    console.log('configuring k8s client 2');
-
-    // client = new Client({ backend: new Request(k8sConfig), version: '1.18' });
-
-    // const kc = new k8s.KubeConfig();
-    // kc.loadFromCluster();
-
-    // const config = require('kubernetes-client/backends/request').config;
-    // const Request = require('kubernetes-client/backends/request');
-
-    // const { KubeConfig } = require('kubernetes-client');
-    // const kubeconfig = new KubeConfig();
-    // kubeconfig.loadFromDefault();
-    // const backend = new Request({ kubeconfig });
-    // client = new Client({ backend, version: '1.18' });
-
-    const backend = new Request(Request.config.getInCluster());
-    client = new Client({ backend });
-
-    await client.loadSpec();
+    console.log('configuring k8s client');
+    const kc = new k8s.KubeConfig();
+    kc.loadFromCluster();
+    k8sCoreApi = kc.makeApiClient(k8s.CoreV1Api);
+    k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+    k8sNetwApi = kc.makeApiClient(k8s.NetworkingV1Api);
     console.log('client configured');
-    return client;
   } catch (err) {
     console.log('Ilija - error in configureKube\n', err);
     process.exit(2);
-    return null;
   }
 }
 
 // async function configureRemoteKube(cluster_url, admin, adminpass) {
 //   try {
 //     console.log('configuring remote k8s client');
+// docs here: https://github.com/kubernetes-client/javascript#create-a-cluster-configuration-programatically
 //     const client = new Client({
 //       config: {
 //         url: cluster_url,
@@ -119,38 +104,48 @@ async function configureKube() {
 // }
 
 async function getPodState(name) {
-  console.log(`Looking for pod ${name} in ml namespace`);
+  console.log(`Looking for pod ${name} in ${config.NAMESPACE} namespace`);
   try {
-    const pod = await client.api.v1.namespaces(config.NAMESPACE).pods(name).get();
-    console.log(pod.body.status.phase);
-    return pod.body.status.phase;
+    const pods = await k8sCoreApi.listNamespacedPod(config.NAMESPACE);
+    for (const pod of pods.body.items) {
+      if (pod.metadata.name === name) {
+        return pod.status.phase;
+      }
+    }
   } catch (err) {
-    console.log(`can't get pod ${name}.`);
-    return null;
+    console.log(`can't get pod ${name}. Error: ${err}.`);
   }
+  return null;
 }
 
 async function getServiceLink(name) {
   console.log(`Looking for service ${name}.`);
-
   try {
     if (config.JL_INGRESS) {
-      const ingress = await client.apis.extensions.v1beta1.namespaces(config.NAMESPACE).ingresses(name).get();
-      console.log(ingress.body);
-      const link = ingress.body.spec.rules[0].host;
-      if (config.SSL === true) {
-        return `https://${link}`;
+      const ingress = await k8sNetwApi.listNamespacedIngress(config.NAMESPACE);      
+      for (const ing of ingress.body.items) {
+        if (ing.metadata.name === name){
+          const link = ing.spec.tls[0].hosts[0];
+          console.log(ing.spec.tls[0].hosts[0]);
+          if (config.SSL === true) {
+            return `https://${link}`;
+          }
+          return `http://${link}`;
+        }
       }
-      return `http://${link}`;
+    } else {
+      console.log('Ilija - not coded for non Ingress instances.\n', err);
+      process.exit(3);
     }
-    const service = await client.api.v1.namespaces(config.NAMESPACE).services(name).get();
-    console.log(service.body.spec.ports);
-    const link = service.body.metadata.labels.servingat;
-    const port = service.body.spec.ports[0].nodePort;
-    if (config.SSL === true) {
-      return `https://${link}:${port}`;
-    }
-    return `http://${link}:${port}`;
+    // this part not rewritten as I can't test now without ingress
+    // const service = await client.api.v1.namespaces(config.NAMESPACE).services(name).get();
+    // console.log(service.body.spec.ports);
+    // const link = service.body.metadata.labels.servingat;
+    // const port = service.body.spec.ports[0].nodePort;
+    // if (config.SSL === true) {
+    //   return `https://${link}:${port}`;
+    // }
+    // return `http://${link}:${port}`;
   } catch (err) {
     console.log(`can't get service ${name}. Err: ${err}`);
     return null;
@@ -159,7 +154,7 @@ async function getServiceLink(name) {
 
 async function cleanup(name) {
   try {
-    await client.api.v1.namespaces(config.NAMESPACE).pods(name).delete();
+    await k8sCoreApi.deleteNamespacedPod(name, config.NAMESPACE);
     await new Promise((resolve) => setTimeout(resolve, 10000));
     console.log(`Pod ${name} deleted.`);
   } catch (err) {
@@ -172,7 +167,7 @@ async function cleanup(name) {
   }
 
   try {
-    await client.api.v1.namespaces(config.NAMESPACE).services(name).delete();
+    await k8sCoreApi.deleteNamespacedService(name, config.NAMESPACE);
     await new Promise((resolve) => setTimeout(resolve, 3000));
     console.log(`Service ${name} deleted.`);
   } catch (err) {
@@ -181,7 +176,7 @@ async function cleanup(name) {
 
   if (config.JL_INGRESS) {
     try {
-      await client.apis.extensions.v1beta1.namespaces(config.NAMESPACE).ingresses(name).delete();
+      await k8sNetwApi.deleteNamespacedIngress(name,config.NAMESPACE);
       await new Promise((resolve) => setTimeout(resolve, 3000));
       console.log(`Ingress ${name} deleted.`);
     } catch (err) {
@@ -193,7 +188,7 @@ async function cleanup(name) {
 async function showPods() {
   console.log('all pods in this namespace');
   try {
-    const pods = await client.api.v1.namespaces(config.NAMESPACE).pods.get();
+    const pods = await k8sCoreApi.listNamespacedPod(config.NAMESPACE);
     pods.body.items.forEach((item) => {
       console.log(item.metadata.name);
       console.log(item.spec.containers[0].resources);
@@ -207,8 +202,9 @@ async function runningUsersServices(owner, servicetype) {
   console.log("all user's pods in ml namespace", owner);
   const results = [];
   try {
-    const pods = await client.api.v1.namespaces(config.NAMESPACE).pods.get();
+    const pods = await k8sCoreApi.listNamespacedPod(config.NAMESPACE);
     for (const item of pods.body.items) {
+      // console.log(item);
       // rewrite this part like this: https://codeburst.io/javascript-async-await-with-foreach-b6ba62bbf404
       // and replace continues with returns
       if (item.metadata.labels === undefined) {
@@ -265,6 +261,20 @@ async function enforceTime2delete() {
     }
   }
 }
+
+
+
+async function f() {
+  config.JL_INGRESS = true;
+  config.NAMESPACE = 'ml-usatlas-org';
+  config.SSL = true;
+  // console.log('state:', await getPodState('coffea'));
+  // console.log('serviceLink:', await getServiceLink('coffea'));
+  // console.log('cleanup:', await cleanup('coffea'));
+  // console.log('show pods:', await showPods());
+  console.log('runningUsersServices:', await runningUsersServices('90a5e8f1-ea46-4d20-aab2-7ae7de964c6e','privatejupyter'));
+}
+f();
 
 async function getLog(name) {
   console.log(`Logs for pod ${name} in ml namespace`);

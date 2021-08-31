@@ -15,7 +15,7 @@ spec:
   selector:
     k8s-app: codas
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: codas
@@ -35,9 +35,12 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
-              serviceName: codas
-              servicePort: 80
+              service:
+                name: codas
+                port:
+                  number: 80
 ---
 apiVersion: apps/v1
 kind: Deployment

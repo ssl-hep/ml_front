@@ -62,16 +62,18 @@ require('./routes/jupyter')(app, config);
 const auth = 'Basic ' + new Buffer(globConf.CLIENT_ID + ':' + globConf.CLIENT_SECRET).toString('base64');
 
 let k8sCoreApi;
-let k8sAppsApi;
 let k8sNetwApi;
 
 async function configureKube() {
   try {
     console.log('configuring k8s client');
     const kc = new k8s.KubeConfig();
-    kc.loadFromCluster();
+    if (TEST) {
+      kc.loadFromDefault();
+    } else {
+      kc.loadFromCluster();
+    }
     k8sCoreApi = kc.makeApiClient(k8s.CoreV1Api);
-    k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sNetwApi = kc.makeApiClient(k8s.NetworkingV1Api);
     console.log('client configured');
   } catch (err) {
@@ -115,16 +117,17 @@ async function getPodState(name) {
   } catch (err) {
     console.log(`can't get pod ${name}. Error: ${err}.`);
   }
-  return null;
+  console.log(`no pod named: ${name}.`);
+  return false;
 }
 
 async function getServiceLink(name) {
   console.log(`Looking for service ${name}.`);
   try {
     if (config.JL_INGRESS) {
-      const ingress = await k8sNetwApi.listNamespacedIngress(config.NAMESPACE);      
+      const ingress = await k8sNetwApi.listNamespacedIngress(config.NAMESPACE);
       for (const ing of ingress.body.items) {
-        if (ing.metadata.name === name){
+        if (ing.metadata.name === name) {
           const link = ing.spec.tls[0].hosts[0];
           console.log(ing.spec.tls[0].hosts[0]);
           if (config.SSL === true) {
@@ -134,7 +137,7 @@ async function getServiceLink(name) {
         }
       }
     } else {
-      console.log('Ilija - not coded for non Ingress instances.\n', err);
+      console.log('Ilija - not coded for non Ingress instances.');
       process.exit(3);
     }
     // this part not rewritten as I can't test now without ingress
@@ -148,23 +151,23 @@ async function getServiceLink(name) {
     // return `http://${link}:${port}`;
   } catch (err) {
     console.log(`can't get service ${name}. Err: ${err}`);
-    return null;
   }
+  return null;
 }
 
 async function cleanup(name) {
   try {
     await k8sCoreApi.deleteNamespacedPod(name, config.NAMESPACE);
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    // await new Promise((resolve) => setTimeout(resolve, 10000));
     console.log(`Pod ${name} deleted.`);
   } catch (err) {
     console.warn(`Unable to delete pod ${name}.  Skipping.`);
   }
 
-  while (await getPodState(name).catch() === 'running') {
-    console.log('still alive. waiting.');
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
+  // while (await getPodState(name).catch() === 'running') {
+  //   console.log('still alive. waiting.');
+  //   await new Promise((resolve) => setTimeout(resolve, 1000));
+  // }
 
   try {
     await k8sCoreApi.deleteNamespacedService(name, config.NAMESPACE);
@@ -176,7 +179,7 @@ async function cleanup(name) {
 
   if (config.JL_INGRESS) {
     try {
-      await k8sNetwApi.deleteNamespacedIngress(name,config.NAMESPACE);
+      await k8sNetwApi.deleteNamespacedIngress(name, config.NAMESPACE);
       await new Promise((resolve) => setTimeout(resolve, 3000));
       console.log(`Ingress ${name} deleted.`);
     } catch (err) {
@@ -189,9 +192,9 @@ async function showPods() {
   console.log('all pods in this namespace');
   try {
     const pods = await k8sCoreApi.listNamespacedPod(config.NAMESPACE);
-    pods.body.items.forEach((item) => {
-      console.log(item.metadata.name);
-      console.log(item.spec.containers[0].resources);
+    pods.body.items.forEach((pod) => {
+      console.log(pod.metadata.name);
+      console.log(pod.spec.containers[0].resources);
     });
   } catch (err) {
     console.log("can't show all pods in this namespace.", err);
@@ -203,39 +206,36 @@ async function runningUsersServices(owner, servicetype) {
   const results = [];
   try {
     const pods = await k8sCoreApi.listNamespacedPod(config.NAMESPACE);
-    for (const item of pods.body.items) {
-      // console.log(item);
+    pods.body.items.forEach(async (pod) => {
+      // console.log(pod);
       // rewrite this part like this: https://codeburst.io/javascript-async-await-with-foreach-b6ba62bbf404
       // and replace continues with returns
-      if (item.metadata.labels === undefined) {
-        continue;
-      }
-      if (item.metadata.labels.owner === owner) {
-        if (item.metadata.labels['k8s-app'] !== servicetype) continue;
+      if (pod.metadata.labels !== undefined) {
+        if (pod.metadata.labels.owner === owner && pod.metadata.labels['k8s-app'] === servicetype) {
+          const crt = Date.parse(pod.metadata.creationTimestamp); // number
 
-        const crt = Date.parse(item.metadata.creationTimestamp); // number
+          if (pod.metadata.labels['k8s-app'] === 'privatejupyter') {
+            const ttl = parseInt(pod.metadata.labels.time2delete.replace('ttl-', ''), 10);
+            const endingat = new Date(crt + ttl * 86400000).toUTCString();
+            const { resources } = pod.spec.containers[0];
+            console.log(resources);
+            const gpus = resources.requests['nvidia.com/gpu'];
+            const cpus = resources.requests.cpu;
+            const ram = resources.requests.memory;
+            const status = pod.status.phase;
+            const link = await getServiceLink(pod.metadata.name);
+            results.push(['Private JupyterLab', pod.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status]);
+          }
 
-        if (item.metadata.labels['k8s-app'] === 'privatejupyter') {
-          const ttl = parseInt(item.metadata.labels.time2delete.replace('ttl-', ''));
-          const endingat = new Date(crt + ttl * 86400000).toUTCString();
-          const { resources } = item.spec.containers[0];
-          console.log(resources);
-          const gpus = resources.requests['nvidia.com/gpu'];
-          const cpus = resources.requests.cpu;
-          const ram = resources.requests.memory;
-          const status = item.status.phase;
-          const link = await getServiceLink(item.metadata.name);
-          results.push(['Private JupyterLab', item.metadata.name, new Date(crt).toUTCString(), endingat, gpus, cpus, ram, `<a href="${link}">${link}</a>`, status]);
-        }
+          if (pod.metadata.labels['k8s-app'] === 'sparkjob') {
+            const execs = pod.spec.containers[0].args[10].replace('spark.executor.instances=', '');
+            const spath = pod.spec.containers[0].args[15];
 
-        if (item.metadata.labels['k8s-app'] === 'sparkjob') {
-          const execs = item.spec.containers[0].args[10].replace('spark.executor.instances=', '');
-          const path = item.spec.containers[0].args[15];
-
-          results.push(['Spark Job', item.metadata.name, new Date(crt).toUTCString(), item.status.phase, execs, path]);
+            results.push(['Spark Job', pod.metadata.name, new Date(crt).toUTCString(), pod.status.phase, execs, spath]);
+          }
         }
       }
-    }
+    });
   } catch (err) {
     console.log("can't show all pods in namespace ml", err);
   }
@@ -243,43 +243,29 @@ async function runningUsersServices(owner, servicetype) {
 }
 
 async function enforceTime2delete() {
-  const pods = await client.api.v1.namespaces(config.NAMESPACE).pods.get();
-  for (const item of pods.body.items) {
-    if (item.metadata.labels === undefined) {
-      continue;
-    }
-    if (item.metadata.labels['k8s-app'] === 'privatejupyter') {
-      // console.log(item.metadata);
-      const ttd = parseInt(item.metadata.labels.time2delete.replace('ttl-', ''));
-      const crt = Date.parse(item.metadata.creationTimestamp);
-      if (Date.now() > crt + ttd * 86400 * 1000) {
-        console.log('Deleting:', item.metadata.name);
-        cleanup(item.metadata.name);
-      } else {
-        console.log('name:', item.metadata.name, ' remaining time: ', (crt + ttd * 86400 * 1000 - Date.now()) / 3600000, ' hours.');
+  const pods = await k8sCoreApi.listNamespacedPod(config.NAMESPACE);
+  pods.body.items.forEach((pod) => {
+    console.log(pod.metadata.name);
+    if (pod.metadata.labels !== undefined) {
+      if (pod.metadata.labels['k8s-app'] === 'privatejupyter') {
+        // console.log(pod.metadata);
+        const ttd = parseInt(pod.metadata.labels.time2delete.replace('ttl-', ''), 10);
+        const crt = Date.parse(pod.metadata.creationTimestamp);
+        if (Date.now() > crt + ttd * 86400 * 1000) {
+          console.log('Deleting:', pod.metadata.name);
+          cleanup(pod.metadata.name);
+        } else {
+          console.log('name:', pod.metadata.name, ' remaining time: ', (crt + ttd * 86400 * 1000 - Date.now()) / 3600000, ' hours.');
+        }
       }
     }
-  }
+  });
 }
-
-
-
-async function f() {
-  config.JL_INGRESS = true;
-  config.NAMESPACE = 'ml-usatlas-org';
-  config.SSL = true;
-  // console.log('state:', await getPodState('coffea'));
-  // console.log('serviceLink:', await getServiceLink('coffea'));
-  // console.log('cleanup:', await cleanup('coffea'));
-  // console.log('show pods:', await showPods());
-  console.log('runningUsersServices:', await runningUsersServices('90a5e8f1-ea46-4d20-aab2-7ae7de964c6e','privatejupyter'));
-}
-f();
 
 async function getLog(name) {
   console.log(`Logs for pod ${name} in ml namespace`);
   try {
-    const podLog = await client.api.v1.namespaces(config.NAMESPACE).pods(name).log.get();
+    const podLog = await k8sCoreApi.readNamespacedPodLog(name, config.NAMESPACE);
     // console.log(podLog);
     return podLog.body;
   } catch (err) {
@@ -309,7 +295,7 @@ async function createJupyter(owner, name, pass, gpu, cpu = 1, memory = '12', tim
     jupyterPodManifest.spec.containers[0].args[3] = repo;
     jupyterPodManifest.spec.serviceAccountName = `${config.NAMESPACE}-fronter`;
 
-    await client.api.v1.namespaces(config.NAMESPACE).pods.post({ body: jupyterPodManifest });
+    await k8sCoreApi.createNamespacedPod(config.NAMESPACE, jupyterPodManifest);
     console.log('pod deployed.');
   } catch (err) {
     console.error(`Error in creating jupyter pod: ${err}`);
@@ -324,7 +310,7 @@ async function createJupyter(owner, name, pass, gpu, cpu = 1, memory = '12', tim
     jupyterServiceManifest.metadata.namespace = config.NAMESPACE;
     jupyterServiceManifest.metadata.labels.instance = name;
     jupyterServiceManifest.spec.selector.instance = name;
-    await client.api.v1.namespaces(config.NAMESPACE).services.post({ body: jupyterServiceManifest });
+    await k8sCoreApi.createNamespacedService(config.NAMESPACE, jupyterServiceManifest);
     console.log('service deployed.');
   } catch (err) {
     console.error(`Error in creating jupyter service: ${err}`);
@@ -336,6 +322,7 @@ async function createJupyter(owner, name, pass, gpu, cpu = 1, memory = '12', tim
   if (config.JL_INGRESS) {
     try {
       const jupyterIngressManifest = require(config.JL_INGRESS.INGRESS);
+
       jupyterIngressManifest.metadata.name = name;
       jupyterIngressManifest.metadata.namespace = config.NAMESPACE;
       jupyterIngressManifest.metadata.labels.instance = name;
@@ -348,8 +335,8 @@ async function createJupyter(owner, name, pass, gpu, cpu = 1, memory = '12', tim
         jupyterIngressManifest.spec.tls[0].hosts[0] = host;
         jupyterIngressManifest.spec.tls[0].secretName = `autogenerated-${name}`;
       }
-      jupyterIngressManifest.spec.rules[0].http.paths[0].backend.serviceName = name;
-      await client.apis.extensions.v1beta1.namespaces(config.NAMESPACE).ingresses.post({ body: jupyterIngressManifest });
+      jupyterIngressManifest.spec.rules[0].http.paths[0].backend.service.name = name;
+      await k8sNetwApi.createNamespacedIngress(config.NAMESPACE, jupyterIngressManifest);
       console.log('ingress deployed.');
     } catch (err) {
       console.error(`Error in creating jupyter ingress: ${err}`);
@@ -363,8 +350,8 @@ async function createJupyter(owner, name, pass, gpu, cpu = 1, memory = '12', tim
   return null;
 }
 
-async function createSparkPod(owner, name, path, executors) {
-  console.log('Starting spark job: ', name, path, executors);
+async function createSparkPod(owner, name, spath, executors) {
+  console.log('Starting spark job: ', name, spath, executors);
 
   try {
     const sparkPodManifest = require(config.SPARK_POD);
@@ -375,13 +362,14 @@ async function createSparkPod(owner, name, path, executors) {
     sparkPodManifest.spec.containers[0].args[4] = `spark.kubernetes.namespace=${config.NAMESPACE}`;
     sparkPodManifest.spec.containers[0].args[10] = `spark.executor.instances=${executors}`;
     sparkPodManifest.spec.containers[0].args[14] = `spark-${name}`;
-    sparkPodManifest.spec.containers[0].args[15] = path;
+    sparkPodManifest.spec.containers[0].args[15] = spath;
     // sparkPodManifest.spec.containers[0].resources.requests["memory"] = memory + "Gi";
     // sparkPodManifest.spec.containers[0].resources.limits["memory"] = 2 * memory + "Gi";
     // sparkPodManifest.spec.containers[0].resources.requests["cpu"] = cpu;
     // sparkPodManifest.spec.containers[0].resources.limits["cpu"] = 2 * cpu;
     console.log(sparkPodManifest);
-    await client.api.v1.namespaces(config.NAMESPACE).pods.post({ body: sparkPodManifest });
+
+    await k8sCoreApi.createNamespacedPod(config.NAMESPACE, sparkPodManifest);
   } catch (err) {
     console.error(`Error in creating spark pod:  ${err}`);
     const error = new Error(`Error in creating spark pod:  ${err}`);

@@ -130,7 +130,7 @@
 			url: '/jupyter',
 			contentType: 'application/json',
 			data: JSON.stringify(data),
-			success: function (link) {
+			success: function () {
 				alert('It can take several minutes after service status changes to "running" for the service to become available.');
 				window.location.href = "/private_jupyter_lab_manage";
 			},

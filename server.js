@@ -245,10 +245,8 @@ async function runningUsersServices(owner, servicetype) {
 async function enforceTime2delete() {
   const pods = await k8sCoreApi.listNamespacedPod(config.NAMESPACE);
   pods.body.items.forEach((pod) => {
-    console.log(pod.metadata.name);
     if (pod.metadata.labels !== undefined) {
       if (pod.metadata.labels['k8s-app'] === 'privatejupyter') {
-        // console.log(pod.metadata);
         const ttd = parseInt(pod.metadata.labels.time2delete.replace('ttl-', ''), 10);
         const crt = Date.parse(pod.metadata.creationTimestamp);
         if (Date.now() > crt + ttd * 86400 * 1000) {
@@ -524,10 +522,9 @@ app.get('/log/:podname', requiresLogin, async (request, response) => {
 
 app.get('/get_users_services/:servicetype', async (req, res) => {
   const { servicetype } = req.params;
-  console.log('user:', req.session.user_id, 'running services.', servicetype);
   await runningUsersServices(req.session.user_id, servicetype)
     .then((resp) => {
-      console.log(resp);
+      console.log(`user ${req.session.user_id} running ${servicetype} services: ${resp}.`);
       res.status(200).send(resp);
     }, (err) => {
       console.trace(err.message);
@@ -537,13 +534,12 @@ app.get('/get_users_services/:servicetype', async (req, res) => {
 app.get('/get_services_from_es/:servicetype', async (req, res) => {
   console.log(req.params);
   const { servicetype } = req.params;
-  console.log('user:', req.session.user_id, 'service:', servicetype);
-
+  console.log(`looking up user ${req.session.user_id} services of type ${servicetype} in ES.`);
   const user = new usr.User(req.session.user_id);
   await user.load();
   user.print();
   const services = await user.get_services(servicetype);
-  console.log(services);
+  console.log(`according to ES user should have services: ${services}`);
   res.status(200).send(services);
 });
 
@@ -555,6 +551,16 @@ app.post('/jupyter', requiresLogin, jupyterCreator, (_req, res) => {
 app.post('/spark', requiresLogin, sparkCreator, (_req, res) => {
   console.log('Spark job created!');
   res.status(200).send('OK');
+});
+
+app.get('/profile', requiresLogin, async (req, res) => {
+  console.log('profile called!');
+  res.render('profile', req.session);
+});
+
+app.get('/users', requiresLogin, async (req, res) => {
+  console.log('users called!');
+  res.render('users', req.session);
 });
 
 app.get('/login', async (req, res) => {

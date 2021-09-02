@@ -195,12 +195,10 @@ module.exports = function us(app, config) {
         service.owner = this.id;
         service.timestamp = new Date().getTime();
         service.user = this.name;
+        service.event = config.EVENT;
         console.log('creating service in es: ', service);
-        await this.es.index({
-          index: 'ml_front', body: service,
-        }, (err, resp, _status) => {
-          console.log('from ES indexer:', resp);
-        });
+        const response = await this.es.index({ index: 'ml_front', body: service });
+        console.log('from ES indexer:', response.body.result);
       } catch (err) {
         console.error(err);
       }
@@ -243,7 +241,7 @@ module.exports = function us(app, config) {
             sort: { timestamp: { order: 'desc' } },
           },
         });
-        // console.log(resp);
+        console.log(resp);
         let toSend = [];
         if (resp.body.hits.total.value > 0) {
           // console.log(resp.body.hits.hits);
@@ -336,16 +334,6 @@ module.exports = function us(app, config) {
     const data = await user.get_all_users();
     res.status(200).send(data);
     console.log('Done.');
-  });
-
-  app.get('/profile', async (req, res) => {
-    console.log('profile called!');
-    res.render('profile', req.session);
-  });
-
-  app.get('/users', async (req, res) => {
-    console.log('users called!');
-    res.render('users', req.session);
   });
 
   app.get('/authorize/:user_id', async (req, res) => {

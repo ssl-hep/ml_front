@@ -61,8 +61,8 @@ spec:
     spec:
       containers:
         - name: ml-front
-          image: sslhep/ml_front:devel
-          imagePullPolicy: IfNotPresent
+          image: sslhep/ml_front:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           livenessProbe:

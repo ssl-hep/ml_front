@@ -129,7 +129,7 @@ async function getServiceLink(name) {
       for (const ing of ingress.body.items) {
         if (ing.metadata.name === name) {
           const link = ing.spec.tls[0].hosts[0];
-          console.log(ing.spec.tls[0].hosts[0]);
+          console.log(`found ingress ${link}`);
           if (config.SSL === true) {
             return `https://${link}`;
           }
@@ -206,8 +206,7 @@ async function runningUsersServices(owner, servicetype) {
   const results = [];
   try {
     const pods = await k8sCoreApi.listNamespacedPod(config.NAMESPACE);
-    pods.body.items.forEach(async (pod) => {
-      // console.log(pod);
+    for (const pod of pods.body.items) {
       // rewrite this part like this: https://codeburst.io/javascript-async-await-with-foreach-b6ba62bbf404
       // and replace continues with returns
       if (pod.metadata.labels !== undefined) {
@@ -218,7 +217,7 @@ async function runningUsersServices(owner, servicetype) {
             const ttl = parseInt(pod.metadata.labels.time2delete.replace('ttl-', ''), 10);
             const endingat = new Date(crt + ttl * 86400000).toUTCString();
             const { resources } = pod.spec.containers[0];
-            console.log(resources);
+            // console.log(resources);
             const gpus = resources.requests['nvidia.com/gpu'];
             const cpus = resources.requests.cpu;
             const ram = resources.requests.memory;
@@ -235,10 +234,11 @@ async function runningUsersServices(owner, servicetype) {
           }
         }
       }
-    });
+    };
   } catch (err) {
     console.log("can't show all pods in namespace ml", err);
   }
+  console.log('running user services', results);
   return results;
 }
 
@@ -539,7 +539,7 @@ app.get('/get_services_from_es/:servicetype', async (req, res) => {
   await user.load();
   user.print();
   const services = await user.get_services(servicetype);
-  console.log(`according to ES user should have services: ${services}`);
+  console.log(`according to ES user had services: ${services}`);
   res.status(200).send(services);
 });
 

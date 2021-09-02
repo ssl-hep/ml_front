@@ -126,8 +126,6 @@ module.exports = function us(app, config) {
           },
         });
 
-        console.debug(response.body.hits);
-
         if (response.body.hits.total.value === 0) {
           console.log('user not found.');
           return false;
@@ -241,7 +239,6 @@ module.exports = function us(app, config) {
             sort: { timestamp: { order: 'desc' } },
           },
         });
-        console.log(resp);
         let toSend = [];
         if (resp.body.hits.total.value > 0) {
           // console.log(resp.body.hits.hits);

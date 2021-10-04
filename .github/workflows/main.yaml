@@ -15,10 +15,8 @@ jobs:
       - name: Docker Build & Push Action
         uses: mr-smithers-excellent/docker-build-push@v5.6
         with:
-          image: ivukotic/atlas-xcache
+          image: sslhep/ml_front
           tags: latest
-          directory: "atlas-xcache"
-          dockerfile: "atlas-xcache/Dockerfile"
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}

@@ -1,29 +1,26 @@
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const elasticsearch = require('@elastic/elasticsearch');
+
 module.exports = function us(app, config) {
-  const elasticsearch = require('@elastic/elasticsearch');
+  let mgConfig;
 
   if (!config.TESTING) {
-    var config = require('/etc/ml-front-conf/mlfront-config.json');
-    var mg_config = require('/etc/mg-conf/config.json');
+  //   config = require('/etc/ml-front-conf/mlfront-config.json');
+    mgConfig = require('/etc/mg-conf/config.json');
   } else {
-    var config = require('../kube/test-ml/secrets/config.json');
-    var mg_config = require('../kube/test-ml/secrets/mg-config.json');
+  //   config = require('../kube/test-ml/secrets/config.json');
+    mgConfig = require('../kube/test-ml/secrets/mg-config.json');
   }
 
-  const formData = require('form-data');
-  const Mailgun = require('mailgun.js');
   const mailgun = new Mailgun(formData);
-  const mg = mailgun.client({username: 'api', key: mg_config.APPROVAL_MG});
-  // old client
-  // let mg = require('mailgun.js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
+  const mg = mailgun.client({ username: 'api', key: mgConfig.APPROVAL_MG });
 
-
-  let module = {};
+  const module = {};
 
   module.User = class User {
     constructor(id = null) {
       this.es = new elasticsearch.Client({ node: config.ES_HOST, log: 'error' });
-      // this.mg = require('mailgun-js')({ apiKey: mg_config.APPROVAL_MG, domain: mg_config.MG_DOMAIN });
-      this.mg = mailgun.client({username: 'api', key: mg_config.APPROVAL_MG});
       this.approved_on = 0;
       this.approved = false;
       if (!config.APPROVAL_REQUIRED) {
@@ -159,36 +156,31 @@ module.exports = function us(app, config) {
         subject: 'Authorization approved',
         text: `Dear ${this.name},\n\n\tyour request for access to ${config.EVENT} ML front has been approved.\n\nBest regards,\n\tML front Approval system.`,
       };
-      this.send_mail_to_user(body);
+      User.sendMailToUser(body);
     }
 
-    send_mail_to_user(data) {
-      this.mg.messages().send(data, (error, body) => {
-        console.log(body);
-      });
+    static sendMailToUser(data) {
+      mg.messages.create(config.SITENAME, data)
+        .then((msg) => console.log(msg))
+        .catch((err) => console.log(err));
     }
 
-    ask_for_approval() {
+    askForApproval() {
       if (config.hasOwnProperty('APPROVAL_EMAIL')) {
-        let link = 'https://' + config.SITENAME + '/authorize/' + this.id;
-        let data = {
-          from: config.EVENT + '<' + config.EVENT + '@maniac.uchicago.edu>',
+        const link = `https://${config.SITENAME}/authorize/${this.id}`;
+        const data = {
+          from: `${config.EVENT}<${config.EVENT}@maniac.uchicago.edu>`,
           to: config.APPROVAL_EMAIL,
           subject: 'Authorization requested',
-          text: 'Dear Sir/Madamme, \n\n\t' + this.name +
-            ' affiliated with ' + this.affiliation +
-            ' requested access to ' + config.EVENT +
-            ' ML front.\n\tTo approve it use this link ' + link +
-            '. To deny the request simply delete this mail.\n\nBest regards,\n\tML front Approval system',
+          text: `Dear Sir/Madamme, \n\n\t${this.name} affiliated with ${this.affiliation} requested access to ${config.EVENT} ML front.\n\tTo approve it use this link ${link}. To deny the request simply delete this mail.\n\nBest regards,\n\tML front Approval system`,
         };
-        this.send_mail_to_user(data);
-      }
-      else {
+        User.sendMailToUser(data);
+      } else {
         console.error("Approval person's mail or mailgun key not configured.");
       }
     }
 
-    async add_service(service) {
+    async AddService(service) {
       try {
         service.owner = this.id;
         service.timestamp = new Date().getTime();
@@ -202,7 +194,7 @@ module.exports = function us(app, config) {
       }
     }
 
-    async terminate_service(name) {
+    async terminateService(name) {
       console.log('terminating service in ES: ', name, 'owned by', this.id);
       console.log('not implemented yet.');
       // try {
@@ -222,7 +214,7 @@ module.exports = function us(app, config) {
       console.log('Done.');
     }
 
-    async get_services(servicetype) {
+    async getServices(servicetype) {
       console.log('getting all services >', servicetype, '< of user:', this.id);
       try {
         const resp = await this.es.search({
@@ -239,21 +231,29 @@ module.exports = function us(app, config) {
             sort: { timestamp: { order: 'desc' } },
           },
         });
-        let toSend = [];
+        const toSend = [];
         if (resp.body.hits.total.value > 0) {
           // console.log(resp.body.hits.hits);
           for (let i = 0; i < resp.body.hits.hits.length; i++) {
-            let obj = resp.body.hits.hits[i]._source;
+            const obj = resp.body.hits.hits[i]._source;
             if (obj.service !== servicetype) continue;
             console.log(obj);
             const startDate = new Date(obj.timestamp).toUTCString();
             if (servicetype === 'privatejupyter') {
               const endDate = new Date(obj.timestamp + obj.ttl * 86400000).toUTCString();
-              const serv = [obj.service, obj.name, startDate, endDate, obj.gpus, obj.cpus, obj.memory];
+              const serv = [
+                obj.service,
+                obj.name,
+                startDate,
+                endDate,
+                obj.gpus,
+                obj.cpus,
+                obj.memory,
+              ];
               toSend.push(serv);
             }
             if (servicetype === 'sparkjob') {
-              var serv = [obj.service, obj.name, startDate, obj.executors, obj.repository];
+              const serv = [obj.service, obj.name, startDate, obj.executors, obj.repository];
               toSend.push(serv);
             }
           }
@@ -277,7 +277,7 @@ module.exports = function us(app, config) {
       console.log('- approved on', this.approved_on);
     }
 
-    async get_all_users() {
+    async getAllUsers() {
       console.log('getting all users info from es.');
       try {
         const resp = await this.es.search({
@@ -289,7 +289,7 @@ module.exports = function us(app, config) {
           },
         });
         // console.log(resp);
-        let toSend = [];
+        const toSend = [];
         if (resp.body.hits.total.value > 0) {
           // console.log("Users found:", resp.body.hits.hits);
           for (let i = 0; i < resp.body.hits.hits.length; i++) {
@@ -297,7 +297,9 @@ module.exports = function us(app, config) {
             // console.log(obj);
             const createdAt = new Date(obj.created_at).toUTCString();
             const approvedOn = new Date(obj.approved_on).toUTCString();
-            const serv = [obj.user, obj.email, obj.affiliation, createdAt, obj.approved, approvedOn];
+            const serv = [
+              obj.user, obj.email, obj.affiliation, createdAt, obj.approved, approvedOn,
+            ];
             toSend.push(serv);
           }
         } else {
@@ -328,7 +330,7 @@ module.exports = function us(app, config) {
   app.get('/users_data', async (req, res) => {
     console.log('Sending all users info...');
     const user = new module.User();
-    const data = await user.get_all_users();
+    const data = await user.getAllUsers();
     res.status(200).send(data);
     console.log('Done.');
   });

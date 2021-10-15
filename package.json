@@ -33,11 +33,12 @@
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "lodash": ">=4.17.21",
-    "mailgun.js": "^3.5.7",
-    "npm": "^7.21.1",
+    "mailgun.js": "^3.6.0",
+    "npm": "^8.1.0",
     "pug": "^3.0.2",
     "request": "^2.88.2",
-    "requires": "^1.0.2"
+    "requires": "^1.0.2",
+    "upgrade": "^1.1.0"
   },
   "devDependencies": {
     "eslint": "^7.32.0",

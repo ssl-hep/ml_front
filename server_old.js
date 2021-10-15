@@ -387,7 +387,7 @@ const jupyterCreator = async (req, res, next) => {
             link: res.link,
             repository: req.body.repository
         };
-        await user.add_service(service_description);
+        await user.AddService(service_description);
         next();
     } catch (err) {
         console.log("Some error in getting service link.", err);
@@ -453,7 +453,7 @@ const sparkCreator = async (req, res, next) => {
             executors: req.body.executors,
             repository: req.body.exe_path
         };
-        await user.add_service(service_description);
+        await user.AddService(service_description);
         next();
     } catch (err) {
         console.log("Some error in getting service link.", err);
@@ -515,7 +515,7 @@ app.get('/get_services_from_es/:servicetype', async function (req, res) {
     var servicetype = req.params.servicetype;
     console.log('user:', req.session.sub_id, 'service:', servicetype);
     var user = await get_user(req.session.sub_id);
-    var services = await user.get_services(servicetype);
+    var services = await user.getServices(servicetype);
     console.log(services);
     res.status(200).send(services);
 });
@@ -640,7 +640,7 @@ app.get('/authcallback', (req, res) => {
             }
             req.session.authorized = user.approved;
             if (user.approved === false) {
-                user.ask_for_approval();
+                user.askForApproval();
             }
             res.redirect("index.html");
         });
@@ -659,7 +659,7 @@ app.get('/authorize/:user_id', async function (req, res) {
 app.get('/users_data', async function (req, res) {
     console.log('Sending all users info...');
     const user = new userm();
-    var data = await user.get_all_users();
+    var data = await user.getAllUsers();
     res.status(200).send(data);
     console.log('Done.');
 });

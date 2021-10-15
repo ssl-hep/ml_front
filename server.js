@@ -435,7 +435,7 @@ const jupyterCreator = async (req, res, next) => {
       link: res.link,
       repository: req.body.repository,
     };
-    await user.add_service(serviceDescription);
+    await user.AddService(serviceDescription);
     next();
   } catch (err) {
     console.log('Some error in getting service link.', err);
@@ -469,7 +469,7 @@ const sparkCreator = async (req, res, next) => {
       executors: req.body.executors,
       repository: req.body.exe_path,
     };
-    await user.add_service(serviceDescription);
+    await user.AddService(serviceDescription);
     next();
   } catch (err) {
     console.log('Some error in getting service link.', err);
@@ -538,7 +538,7 @@ app.get('/get_services_from_es/:servicetype', async (req, res) => {
   const user = new usr.User(req.session.user_id);
   await user.load();
   user.print();
-  const services = await user.get_services(servicetype);
+  const services = await user.getServices(servicetype);
   console.log(`according to ES user had services: ${services}`);
   res.status(200).send(services);
 });
@@ -664,7 +664,7 @@ app.get('/authcallback', (req, res) => {
       console.log('user is authorized:', user.approved);
       req.session.authorized = user.approved;
       if (user.approved === false) {
-        user.ask_for_approval();
+        user.askForApproval();
       }
       res.render('index', req.session);
     });

@@ -161,8 +161,8 @@ module.exports = function us(app, config) {
 
     static sendMailToUser(data) {
       mg.messages.create(config.SITENAME, data)
-        .then((msg) => console.log(msg))
-        .catch((err) => console.log(err));
+        .then((msg) => console.log(`mailgun response:${msg}`))
+        .catch((err) => console.log(`mailgun error: ${err}`));
     }
 
     askForApproval() {

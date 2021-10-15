@@ -160,7 +160,7 @@ module.exports = function us(app, config) {
     }
 
     static sendMailToUser(data) {
-      mg.messages.create(config.SITENAME, data)
+      mg.messages.create(mgConfig.MG_DOMAIN, data)
         .then((msg) => console.log(`mailgun response:${msg}`))
         .catch((err) => console.log(`mailgun error: ${err}`));
     }

@@ -416,6 +416,7 @@ const jupyterCreator = async (req, res, next) => {
       repository: req.body.repository,
     };
     await user.AddService(serviceDescription);
+    next();
   } catch (err) {
     console.log('Some error in getting service link.', err);
     next(err);

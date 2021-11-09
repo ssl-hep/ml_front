@@ -359,8 +359,9 @@ async function createSparkPod(owner, name, spath, executors) {
 
 const jupyterCreator = async (req, res, next) => {
   if (req.body === 'undefined' || req.body === null) {
-    res.status(400).send('nothing POSTed.');
-    return;
+    const err = new Error('nothing POSTed');
+    err.status = 500;
+    next(err);
   }
 
   console.log('body:', req.body);
@@ -376,13 +377,14 @@ const jupyterCreator = async (req, res, next) => {
       req.body.time = parseInt(req.body.time, 10);
       req.body.gpus = parseInt(req.body.gpus, 10);
     } catch (error) {
-      res.sendStatus(400).send('unparseable parameters.');
-      return;
+      const err = new Error('Unparsable parameters.');
+      err.status = 500;
+      next(err);
     }
-    next();
   } else {
-    res.sendStatus(400).send('not all parameters POSTed.');
-    return;
+    const err = new Error('Not all parameters POSTed.');
+    err.status = 500;
+    next(err);
   }
 
   await cleanup(req.body.name);
@@ -395,7 +397,7 @@ const jupyterCreator = async (req, res, next) => {
     );
   } catch (err) {
     console.log('Some error in creating jupyter.', err);
-    res.status(500).send('Some error in creating your JupyterLab.');
+    next(err);
   }
 
   try {
@@ -414,10 +416,9 @@ const jupyterCreator = async (req, res, next) => {
       repository: req.body.repository,
     };
     await user.AddService(serviceDescription);
-    next();
   } catch (err) {
     console.log('Some error in getting service link.', err);
-    res.status(500).send('Some error in creating your JupyterLab.');
+    next(err);
   }
 };
 
@@ -462,7 +463,7 @@ const requiresLogin = async (req, _res, next) => {
     console.log('NOT logged in!');
     const error = new Error('You must be logged in to view this page.');
     error.status = 403;
-    return next(error);
+    next(error);
   }
 
   if (config.APPROVAL_REQUIRED === false) return next();
@@ -676,7 +677,8 @@ app.get('/', async (req, res) => {
   res.render('index', req.session);
 });
 
-app.use((req, res) => {
+app.use((err, req, res, _next) => {
+  console.log(`I'm the error handler. '${err.message}' status: ${err.status} `);
   console.error('Unexisting page requested:', req.path);
   console.error('Parameters:', req.params);
   res.status(404);

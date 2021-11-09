@@ -18,15 +18,15 @@ let certificate;
 let globConf;
 
 if (!TEST) {
-  config = require('/etc/ml-front-conf/mlfront-config.json');
-  globConf = require('/etc/globus-conf/globus-config.json');
+  config = JSON.parse(fs.readFileSync('/etc/ml-front-conf/mlfront-config.json', 'utf8'));
+  globConf = JSON.parse(fs.readFileSync('/etc/globus-conf/globus-config.json', 'utf8'));
   if (!config.INGRESS_CONTROLLER) {
     privateKey = fs.readFileSync('/etc/https-certs/key.pem');
     certificate = fs.readFileSync('/etc/https-certs/cert.pem');
   }
 } else {
-  config = require('./kube/test-ml/secrets/config.json');
-  globConf = require('./kube/test-ml/secrets/globus-config.json');
+  config = JSON.parse(fs.readFileSync('./kube/test-ml/secrets/config.json', 'utf8'));
+  globConf = JSON.parse(fs.readFileSync('./kube/test-ml/secrets/globus-config.json', 'utf8'));
   if (!config.INGRESS_CONTROLLER) {
     privateKey = fs.readFileSync('./kube/test-ml/secrets/certificates/test-ml.pem');
     certificate = fs.readFileSync('./kube/test-ml/secrets/certificates/test-ml.pem');
@@ -59,7 +59,8 @@ require('./routes/spark')(app);
 require('./routes/jupyter')(app, config);
 
 // GLOBUS STUFF
-const auth = 'Basic ' + new Buffer(globConf.CLIENT_ID + ':' + globConf.CLIENT_SECRET).toString('base64');
+let auth = Buffer.from(`${globConf.CLIENT_ID}:${globConf.CLIENT_SECRET}`, 'base64');
+auth = `Basic ${auth}`;
 
 let k8sCoreApi;
 let k8sNetwApi;
@@ -81,29 +82,6 @@ async function configureKube() {
     process.exit(2);
   }
 }
-
-// async function configureRemoteKube(cluster_url, admin, adminpass) {
-//   try {
-//     console.log('configuring remote k8s client');
-// docs here: https://github.com/kubernetes-client/javascript#create-a-cluster-configuration-programatically
-//     const client = new Client({
-//       config: {
-//         url: cluster_url,
-//         auth: {
-//           user: admin,
-//           pass: adminpass,
-//         },
-//         insecureSkipTlsVerify: true,
-//       },
-//     });
-//     await client.loadSpec();
-//     console.log('client configured');
-//     return client;
-//   } catch (err) {
-//     console.log('Error in configureRemoteKube\n', err);
-//     process.exit(2);
-//   }
-// }
 
 async function getPodState(name) {
   console.log(`Looking for pod ${name} in ${config.NAMESPACE} namespace`);
@@ -234,7 +212,7 @@ async function runningUsersServices(owner, servicetype) {
           }
         }
       }
-    };
+    }
   } catch (err) {
     console.log("can't show all pods in namespace ml", err);
   }
@@ -276,7 +254,7 @@ async function createJupyter(owner, name, pass, gpu, cpu = 1, memory = '12', tim
   console.log('Deploying jupyter: ', name, pass, gpu, cpu, memory, time, repo);
 
   try {
-    const jupyterPodManifest = require(config.JL_POD);
+    const jupyterPodManifest = JSON.parse(fs.readFileSync(config.JL_POD, 'utf8'));
     jupyterPodManifest.metadata.name = name;
     jupyterPodManifest.metadata.namespace = config.NAMESPACE;
     jupyterPodManifest.metadata.labels.time2delete = `ttl-${String(time)}`;
@@ -286,7 +264,7 @@ async function createJupyter(owner, name, pass, gpu, cpu = 1, memory = '12', tim
     jupyterPodManifest.spec.containers[0].resources.requests['nvidia.com/gpu'] = gpu;
     jupyterPodManifest.spec.containers[0].resources.limits['nvidia.com/gpu'] = gpu;
     jupyterPodManifest.spec.containers[0].resources.requests.memory = `${memory}Gi`;
-    jupyterPodManifest.spec.containers[0].resources.limits.memory = 2 * memory + 'Gi';
+    jupyterPodManifest.spec.containers[0].resources.limits.memory = `${2 * memory}Gi`;
     jupyterPodManifest.spec.containers[0].resources.requests.cpu = cpu;
     jupyterPodManifest.spec.containers[0].resources.limits.cpu = 2 * cpu;
     jupyterPodManifest.spec.containers[0].args[2] = pass;
@@ -303,7 +281,7 @@ async function createJupyter(owner, name, pass, gpu, cpu = 1, memory = '12', tim
   }
 
   try {
-    const jupyterServiceManifest = require(config.JL_SERVICE);
+    const jupyterServiceManifest = JSON.parse(fs.readFileSync(config.JL_SERVICE, 'utf8'));
     jupyterServiceManifest.metadata.name = name;
     jupyterServiceManifest.metadata.namespace = config.NAMESPACE;
     jupyterServiceManifest.metadata.labels.instance = name;
@@ -319,7 +297,7 @@ async function createJupyter(owner, name, pass, gpu, cpu = 1, memory = '12', tim
 
   if (config.JL_INGRESS) {
     try {
-      const jupyterIngressManifest = require(config.JL_INGRESS.INGRESS);
+      const jupyterIngressManifest = JSON.parse(fs.readFileSync(config.JL_INGRESS.INGRESS, 'utf8'));
 
       jupyterIngressManifest.metadata.name = name;
       jupyterIngressManifest.metadata.namespace = config.NAMESPACE;
@@ -352,7 +330,7 @@ async function createSparkPod(owner, name, spath, executors) {
   console.log('Starting spark job: ', name, spath, executors);
 
   try {
-    const sparkPodManifest = require(config.SPARK_POD);
+    const sparkPodManifest = JSON.parse(fs.readFileSync(config.SPARK_POD, 'utf8'));
     sparkPodManifest.metadata.name = name;
     sparkPodManifest.metadata.namespace = config.NAMESPACE;
     sparkPodManifest.metadata.labels.instance = name;
@@ -544,7 +522,7 @@ app.get('/get_services_from_es/:servicetype', async (req, res) => {
 });
 
 app.post('/jupyter', requiresLogin, jupyterCreator, (_req, res) => {
-  console.log('Private Jupyter created!');
+  console.log(`Private Jupyter created and accessible at ${res.link}`);
   res.status(200).send(res.link);
 });
 
@@ -646,17 +624,17 @@ app.get('/authcallback', (req, res) => {
       headers: { Authorization: `Bearer ${body.access_token}` },
     };
 
-    mrequest.post(idrequestOptions, async (error, _response, body) => {
-      if (error) {
-        console.log('error on geting username:\t', error);
+    mrequest.post(idrequestOptions, async (lerror, _lresponse, lbody) => {
+      if (lerror) {
+        console.log('error on geting username:\t', lerror);
       }
-      console.log('body:\t', body);
+      console.log('body:\t', lbody);
       const user = new usr.User();
-      user.id = req.session.user_id = body.sub;
-      user.username = req.session.username = body.preferred_username;
-      user.affiliation = req.session.affiliation = body.organization;
-      user.name = req.session.name = body.name;
-      user.email = req.session.email = body.email;
+      user.id = req.session.user_id = lbody.sub;
+      user.username = req.session.username = lbody.preferred_username;
+      user.affiliation = req.session.affiliation = lbody.organization;
+      user.name = req.session.name = lbody.name;
+      user.email = req.session.email = lbody.email;
       const found = await user.load();
       if (found === false) {
         await user.write();

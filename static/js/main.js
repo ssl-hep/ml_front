@@ -108,14 +108,14 @@
     data.image = $('#imageselection').val();
     console.log(data);
     // call REST API to create a Private Jupyter Instance
-    // $('.loaderImage').show();
+    $('.loaderImage').show();
     let jqxhr = $.ajax({
       type: 'post',
       url: '/jupyter',
       contentType: 'application/json',
       data: JSON.stringify(data),
       success() {
-        // $('.loaderImage').hide();
+        $('.loaderImage').hide();
         alert('It can take several minutes after service status changes to "running" for the service to become available.');
         window.location.href = '/private_jupyter_lab_manage';
       },

@@ -462,7 +462,7 @@ const requiresLogin = async (req, _res, next) => {
   if (req.session.loggedIn !== true) {
     console.log('NOT logged in!');
     const error = new Error('You must be logged in to view this page.');
-    error.status = 403;
+    error.status = 401;
     next(error);
   }
 
@@ -679,10 +679,14 @@ app.get('/', async (req, res) => {
 
 app.use((err, req, res, _next) => {
   console.log(`I'm the error handler. '${err.message}' status: ${err.status} `);
+  res.render('error', { error: err.message });
+});
+
+app.use((req, res) => {
   console.error('Unexisting page requested:', req.path);
   console.error('Parameters:', req.params);
   res.status(404);
-  res.render('error', { error: 'Not Found' });
+  res.render('error', { error: 'No such page.' });
 });
 
 if (!config.TESTING && !config.INGRESS_CONTROLLER) {

@@ -1,34 +1,8 @@
-doctype html
-html
-    include ./head.pug
-    body
-        include ./navigation.pug
+extends ./index.pug
 
-        block content
-            .row
-                h1 Error 404
-                    p.lead
-                    | Error 404
-
-        block footer
-            include ./footer.pug
-
-        block cdn_scripts
-            // jquery - .get .ajax etc.
-            script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous")
-            // jquery-ui
-            script(src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous")
-            // data tables
-            script(src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
-
-
-            // twitter bootstrap for mobile
-            script(src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha256-CjSoeELFOcH0/uxWu6mC/Vlrc1AARqbm/jiiImDGV3s=" crossorigin="anonymous")
-
-            // poppers management https://popper.js.org/
-            script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha256-ZvOgfh+ptkpoa2Y4HkRY28ir89u/+VRyDE7sB7hEEcI=" crossorigin="anonymous")
-
-        block my_scripts
-            script(src='js/main.js')
-
-        block extra_scripts
+block content
+    .row
+        h1 Error
+            p.lead
+            | Code: #{code}
+            | Message: #{text} 

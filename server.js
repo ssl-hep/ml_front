@@ -59,7 +59,7 @@ require('./routes/spark')(app);
 require('./routes/jupyter')(app, config);
 
 // GLOBUS STUFF
-let auth = Buffer.from(`${globConf.CLIENT_ID}:${globConf.CLIENT_SECRET}`, 'base64');
+let auth = Buffer.from(`${globConf.CLIENT_ID}:${globConf.CLIENT_SECRET}`, 'utf8').toString('base64');
 auth = `Basic ${auth}`;
 
 let k8sCoreApi;

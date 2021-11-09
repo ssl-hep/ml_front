@@ -1,3 +1,4 @@
+const fs = require('fs');
 const formData = require('form-data');
 const Mailgun = require('mailgun.js');
 const elasticsearch = require('@elastic/elasticsearch');
@@ -6,11 +7,9 @@ module.exports = function us(app, config) {
   let mgConfig;
 
   if (!config.TESTING) {
-  //   config = require('/etc/ml-front-conf/mlfront-config.json');
-    mgConfig = require('/etc/mg-conf/config.json');
+    mgConfig = JSON.parse(fs.readFileSync('/etc/mg-conf/config.json', 'utf8'));
   } else {
-  //   config = require('../kube/test-ml/secrets/config.json');
-    mgConfig = require('../kube/test-ml/secrets/mg-config.json');
+    mgConfig = JSON.parse(fs.readFileSync('../kube/test-ml/secrets/mg-config.json', 'utf8'));
   }
 
   const mailgun = new Mailgun(formData);

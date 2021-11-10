@@ -28,10 +28,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - www.atlas-ml.org
+        - www.atlas-ml.net
       secretName: auto-generated-ml-usatlas-org
   rules:
-    - host: www.atlas-ml.org
+    - host: www.atlas-ml.net
       http:
         paths:
           - path: /

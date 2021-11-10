@@ -1,0 +1,50 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ml-public
+  namespace: ml-usatlas-org
+  labels:
+    k8s-app: ml-public
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 30080
+      targetPort: 9999
+  selector:
+    k8s-app: ml-public
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ml-public
+  namespace: ml-usatlas-org
+  labels:
+    k8s-app: ml-public
+spec:
+  containers:
+    - name: ml-public
+      image: ivukotic/ml_platform_auto:latest
+      args: ["/.run", "/ML_platform_tests/SetupPublicJupyterLab.sh"]
+      ports:
+        - containerPort: 9999
+      resources:
+        requests:
+          cpu: "3"
+          memory: "16Gi"
+          nvidia.com/gpu: "1"
+        limits:
+          cpu: "6"
+          memory: "32Gi"
+          nvidia.com/gpu: "1"
+      volumeMounts:
+        - name: local-scratch
+          mountPath: /data/
+          readOnly: false
+  volumes:
+    - name: local-scratch
+      hostPath:
+        path: /data
+  nodeSelector:
+    mlnode: "true"
+  restartPolicy: Always

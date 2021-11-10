@@ -1,7 +1,7 @@
 ; (function () {
   'use strict';
 
-  const dropdown = function () {
+  const dropdown = () => {
     $('.has-dropdown').mouseenter(function () {
       let $this = $(this);
       $this

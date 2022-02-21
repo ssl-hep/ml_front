@@ -16,7 +16,7 @@
         "containers": [
             {
                 "name": "privatejupyter",
-                "image": "ivukotic/ml_platform_auto:latest",
+                "image": "ivukotic/ml_platform:latest",
                 "args": [
                     "/.run",
                     "/ML_platform_tests/SetupPrivateJupyterLab.sh",
